@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'document_gallery_page.dart';
+import 'transaction_detail_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -56,7 +58,19 @@ class MyHomePage extends StatelessWidget {
            child: ListView(
             scrollDirection: Axis.horizontal,
            children: <Widget>[
-            Card(
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DocumentGalleryPage(
+                      title: "Identification Documents",
+                      imageUrls: [],
+                    ),
+                  ),
+                );
+              },
+            child: Card(
               shape: RoundedRectangleBorder(
                borderRadius: BorderRadius.circular(16),
                 ),
@@ -85,8 +99,21 @@ class MyHomePage extends StatelessWidget {
                 ),
                 ),
             ),
+           ),
             //const SizedBox(width: 10),
-            Card(
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DocumentGalleryPage(
+                      title: "Vehicle Sale Deeds",
+                      imageUrls: [],
+                    ),
+                  ),
+                );
+              },
+            child: Card(
               shape: RoundedRectangleBorder(
                borderRadius: BorderRadius.circular(16),
                 ),
@@ -114,8 +141,21 @@ class MyHomePage extends StatelessWidget {
                 ),
                 ),
             ),
+           ),
             //const SizedBox(width: 10),
-            Card(
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DocumentGalleryPage(
+                      title: "Sale Power of Attorney",
+                      imageUrls: [],
+                    ),
+                  ),
+                );
+              },
+            child: Card(
               shape: RoundedRectangleBorder(
                borderRadius: BorderRadius.circular(16),
                 ),
@@ -144,8 +184,21 @@ class MyHomePage extends StatelessWidget {
                 ),
                 ),
             ),
+            ),
             //const SizedBox(width: 10),
-            Card(
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DocumentGalleryPage(
+                      title: "Special/General Power of Attorney",
+                      imageUrls: [],
+                    ),
+                  ),
+                );
+              },
+            child: Card(
               shape: RoundedRectangleBorder(
                borderRadius: BorderRadius.circular(16),
                 ),
@@ -176,7 +229,20 @@ class MyHomePage extends StatelessWidget {
                 ),
                 ),
             ),
-            Card(
+            ),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DocumentGalleryPage(
+                      title: "Police Reports",
+                      imageUrls: [],
+                    ),
+                  ),
+                );
+              },
+            child: Card(
               shape: RoundedRectangleBorder(
                borderRadius: BorderRadius.circular(16),
                 ),
@@ -205,9 +271,20 @@ class MyHomePage extends StatelessWidget {
                 ),
                 ),
             ),
-
-
-            Card(
+            ),
+             GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DocumentGalleryPage(
+                      title: "Inheritance Certificates",
+                      imageUrls: [],
+                    ),
+                  ),
+                );
+              },
+            child: Card(
               shape: RoundedRectangleBorder(
                borderRadius: BorderRadius.circular(16),
                 ),
@@ -237,9 +314,20 @@ class MyHomePage extends StatelessWidget {
                 ),
                 ),
             ),
-
-
-            Card(
+             ),
+              GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DocumentGalleryPage(
+                      title: "Lien Release",
+                      imageUrls: [],
+                    ),
+                  ),
+                );
+              },
+            child: Card(
               shape: RoundedRectangleBorder(
                borderRadius: BorderRadius.circular(16),
                 ),
@@ -269,8 +357,20 @@ class MyHomePage extends StatelessWidget {
                 ),
                 ),
             ),
-
-            Card(
+              ),
+              GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DocumentGalleryPage(
+                      title: "Vehicle Scrap Certificate",
+                      imageUrls: [],
+                    ),
+                  ),
+                );
+              },
+            child: Card(
               shape: RoundedRectangleBorder(
                borderRadius: BorderRadius.circular(16),
                 ),
@@ -300,8 +400,22 @@ class MyHomePage extends StatelessWidget {
                 ),
                 ),
             ),
+              ),
 
-            Card(
+              GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DocumentGalleryPage(
+                      title: "Other",
+                      imageUrls: [],
+                    ),
+                  ),
+                );
+              },
+    
+             child: Card(
               shape: RoundedRectangleBorder(
                borderRadius: BorderRadius.circular(16),
                 ),
@@ -330,8 +444,7 @@ class MyHomePage extends StatelessWidget {
                 ),
                 ),
             ),
-
-
+              ),
 
           ]
 
@@ -382,10 +495,10 @@ class MyHomePage extends StatelessWidget {
            ),
 
 
-            SizedBox(height:25),
-
-            Padding(
-           padding: const EdgeInsets.symmetric(horizontal: 23),
+            SizedBox(height:5),
+             Expanded(
+            child :Padding(
+           padding: const EdgeInsets.symmetric(horizontal: 23, vertical: 16),
            
            child: Container(
             
@@ -393,36 +506,113 @@ class MyHomePage extends StatelessWidget {
              color: Colors.white,
              borderRadius: BorderRadius.circular(16),
             ),
-            child: SizedBox(
-             height: 255,
+          
            child: ListView(
             scrollDirection: Axis.vertical,
             children: <Widget>[
               ListTile(
+                onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TransactionDetailPage(
+                          clientName: "Test User 1",
+                          transactionType: "Public Taxi Registration",
+                          status: "Completed",
+                          dateReceived: "2024-05-15",
+                          dateCompleted: "2024-05-15",
+                          imageUrls: [],
+                        ),
+                      ),
+                    );
+                  },
                 leading: Icon(Icons.local_taxi, color: Colors.teal),
                 title: Text("Test User 1"),
                 subtitle: Text("Completed on 2024-05-15"),
                 trailing: Icon(Icons.check_circle, color: Colors.green),
               ),
               ListTile(
+
+                onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TransactionDetailPage(
+                            clientName: "Test User 2",
+                            transactionType: "Driver's License Renewal",
+                            status: "Pending",
+                            dateReceived: "2024-05-15",
+                            dateCompleted: "",
+                            imageUrls: [],
+                          ),
+                        ),
+                      );
+                    },
+
                 leading: Icon(Icons.card_membership, color: Colors.teal),
                 title: Text("Test User 2"),
                 subtitle: Text("Pending since 2024-06-01"),
                 trailing: Icon(Icons.hourglass_empty, color: Colors.orange),
               ),
               ListTile(
+
+                onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TransactionDetailPage(
+                            clientName: "Test User 3",
+                            transactionType: "Lien Release",
+                            status: "Completed",
+                            dateReceived: "2024-04-15",
+                            dateCompleted: "2024-04-20",
+                            imageUrls: [],
+                          ),
+                        ),
+                      );
+                    },
                 leading: Icon(Icons.lock_open, color: Colors.teal),
                 title: Text("Test User 3"),
                 subtitle: Text("Completed on 2024-04-20"),
                 trailing: Icon(Icons.check_circle, color: Colors.green),
               ),
               ListTile(
+                onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TransactionDetailPage(
+                            clientName: "Test User 4",
+                            transactionType: "Private Car Ownership Transfer",
+                            status: "Pending",
+                            dateReceived: "2024-05-15",
+                            dateCompleted: "",
+                            imageUrls: [],
+                          ),
+                        ),
+                      );
+                    },
                 leading: Icon(Icons.directions_car, color: Colors.teal),
                 title: Text("Test User 4"),
                 subtitle: Text("Pending since 2024-05-30"),
                 trailing: Icon(Icons.hourglass_empty, color: Colors.orange),
               ),
               ListTile(
+                onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TransactionDetailPage(
+                            clientName: "Test User 5",
+                            transactionType: "Public Taxi Registration",
+                            status: "Pending",
+                            dateReceived: "2024-05-15",
+                            dateCompleted: "",
+                            imageUrls: [],
+                          ),
+                        ),
+                      );
+                    },
                 leading: Icon(Icons.swap_horiz, color: Colors.teal),
                 title: Text("Test User 5"),
                 subtitle: Text("Pending since 2024-05-30"),
@@ -430,9 +620,11 @@ class MyHomePage extends StatelessWidget {
               ),
            ]
            )
+           
            )
-           )
+
             ),
+             ),
         ],
         
       ),
