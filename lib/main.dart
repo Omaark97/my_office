@@ -24,17 +24,22 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
-
   final String title;
 
   @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+
+class _MyHomePageState extends State<MyHomePage> {
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+     appBar: AppBar(
         backgroundColor: const Color(0xFFF2F2F7),
-        title: Text(title),
+        title: Text(widget.title),
       ),
 
 
@@ -633,5 +638,6 @@ class MyHomePage extends StatelessWidget {
     );
   }
 }
+  
 
 
