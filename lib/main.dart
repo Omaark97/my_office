@@ -34,6 +34,50 @@ class MyHomePage extends StatefulWidget {
 
 
 class _MyHomePageState extends State<MyHomePage> {
+
+  List<Map<String, dynamic>> transactions = [
+  {
+    'icon': Icons.local_taxi,
+    'type': 'Public Taxi Registration',
+    'client': 'Test User 1',
+    'dateReceived': '2024-05-15',
+    'dateCompleted': '2024-05-15',
+    'status': 'Completed',
+  },
+  {
+    'icon': Icons.card_membership,
+    'type': "Driver's License Renewal",
+    'client': 'Test User 2',
+    'dateReceived': '2024-06-01',
+    'dateCompleted': '',
+    'status': 'Pending',
+  },
+  {
+    'icon': Icons.lock_open,
+    'type': 'Lien Release',
+    'client': 'Test User 3',
+    'dateReceived': '2024-04-15',
+    'dateCompleted': '2024-04-20',
+    'status': 'Completed',
+  },
+  {
+    'icon': Icons.directions_car,
+    'type': 'Private Car Ownership Transfer',
+    'client': 'Test User 4',
+    'dateReceived': '2024-05-30',
+    'dateCompleted': '',
+    'status': 'Pending',
+  },
+  {
+    'icon': Icons.swap_horiz,
+    'type': 'Public Taxi Registration',
+    'client': 'Test User 5',
+    'dateReceived': '2024-05-30',
+    'dateCompleted': '',
+    'status': 'Pending',
+  },
+];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -512,119 +556,41 @@ class _MyHomePageState extends State<MyHomePage> {
              borderRadius: BorderRadius.circular(16),
             ),
           
-           child: ListView(
-            scrollDirection: Axis.vertical,
-            children: <Widget>[
-              ListTile(
-                onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TransactionDetailPage(
-                          clientName: "Test User 1",
-                          transactionType: "Public Taxi Registration",
-                          status: "Completed",
-                          dateReceived: "2024-05-15",
-                          dateCompleted: "2024-05-15",
-                          imageUrls: [],
-                        ),
-                      ),
-                    );
-                  },
-                leading: Icon(Icons.local_taxi, color: Colors.teal),
-                title: Text("Test User 1"),
-                subtitle: Text("Completed on 2024-05-15"),
-                trailing: Icon(Icons.check_circle, color: Colors.green),
-              ),
-              ListTile(
-
-                onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => TransactionDetailPage(
-                            clientName: "Test User 2",
-                            transactionType: "Driver's License Renewal",
-                            status: "Pending",
-                            dateReceived: "2024-05-15",
-                            dateCompleted: "",
-                            imageUrls: [],
-                          ),
-                        ),
-                      );
-                    },
-
-                leading: Icon(Icons.card_membership, color: Colors.teal),
-                title: Text("Test User 2"),
-                subtitle: Text("Pending since 2024-06-01"),
-                trailing: Icon(Icons.hourglass_empty, color: Colors.orange),
-              ),
-              ListTile(
-
-                onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => TransactionDetailPage(
-                            clientName: "Test User 3",
-                            transactionType: "Lien Release",
-                            status: "Completed",
-                            dateReceived: "2024-04-15",
-                            dateCompleted: "2024-04-20",
-                            imageUrls: [],
-                          ),
-                        ),
-                      );
-                    },
-                leading: Icon(Icons.lock_open, color: Colors.teal),
-                title: Text("Test User 3"),
-                subtitle: Text("Completed on 2024-04-20"),
-                trailing: Icon(Icons.check_circle, color: Colors.green),
-              ),
-              ListTile(
-                onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => TransactionDetailPage(
-                            clientName: "Test User 4",
-                            transactionType: "Private Car Ownership Transfer",
-                            status: "Pending",
-                            dateReceived: "2024-05-15",
-                            dateCompleted: "",
-                            imageUrls: [],
-                          ),
-                        ),
-                      );
-                    },
-                leading: Icon(Icons.directions_car, color: Colors.teal),
-                title: Text("Test User 4"),
-                subtitle: Text("Pending since 2024-05-30"),
-                trailing: Icon(Icons.hourglass_empty, color: Colors.orange),
-              ),
-              ListTile(
-                onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => TransactionDetailPage(
-                            clientName: "Test User 5",
-                            transactionType: "Public Taxi Registration",
-                            status: "Pending",
-                            dateReceived: "2024-05-15",
-                            dateCompleted: "",
-                            imageUrls: [],
-                          ),
-                        ),
-                      );
-                    },
-                leading: Icon(Icons.swap_horiz, color: Colors.teal),
-                title: Text("Test User 5"),
-                subtitle: Text("Pending since 2024-05-30"),
-                trailing: Icon(Icons.hourglass_empty, color: Colors.orange),
-              ),
-           ]
-           )
+           child: ListView.builder(
+  itemCount: transactions.length,
+  itemBuilder: (context, index) {
+    final t = transactions[index];
+    
+    return ListTile(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TransactionDetailPage(
+              clientName: t['client'],
+              transactionType: t['type'],
+              status: t['status'],
+              dateReceived: t['dateReceived'],
+              dateCompleted: t['dateCompleted'],
+              imageUrls: [],
+            ),
+          ),
+        );
+      },
+      leading: Icon(t['icon'], color: Colors.teal),
+      title: Text(t['client']),
+      subtitle: Text(
+        t['status'] == 'Completed'
+            ? 'Completed on ${t['dateCompleted']}'
+            : 'Pending since ${t['dateReceived']}',
+      ),
+      trailing: Icon(
+        t['status'] == 'Completed' ? Icons.check_circle : Icons.hourglass_empty,
+        color: t['status'] == 'Completed' ? Colors.green : Colors.orange,
+      ),
+    );
+  },
+),
            
            )
 
