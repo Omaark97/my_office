@@ -43,6 +43,11 @@ class _MyHomePageState extends State<MyHomePage> {
     'dateReceived': '2024-05-15',
     'dateCompleted': '2024-05-15',
     'status': 'Completed',
+    'documents': [
+      {'name': 'ID_Front.jpg', 'dateUploaded': '2024-05-15', 'size': '1.2 MB'},
+      {'name': 'Taxi_License.pdf', 'dateUploaded': '2024-05-15', 'size': '2.5 MB'},
+      {'name': 'Sale_Deed.pdf', 'dateUploaded': '2024-05-15', 'size': '3.1 MB'},
+    ],
   },
   {
     'icon': Icons.card_membership,
@@ -51,6 +56,10 @@ class _MyHomePageState extends State<MyHomePage> {
     'dateReceived': '2024-06-01',
     'dateCompleted': '',
     'status': 'Pending',
+    'documents': [
+      {'name': 'Current_License.jpg', 'dateUploaded': '2024-06-01', 'size': '1.2 MB'},
+      {'name': 'Proof_of_Residency.pdf', 'dateUploaded': '2024-06-01', 'size': '2.8 MB'},
+    ],
   },
   {
     'icon': Icons.lock_open,
@@ -59,6 +68,9 @@ class _MyHomePageState extends State<MyHomePage> {
     'dateReceived': '2024-04-15',
     'dateCompleted': '2024-04-20',
     'status': 'Completed',
+    'documents': [
+      {'name': 'Bank_Release_Letter.pdf', 'dateUploaded': '2024-04-15', 'size': '0.8 MB'},
+    ],
   },
   {
     'icon': Icons.directions_car,
@@ -67,6 +79,12 @@ class _MyHomePageState extends State<MyHomePage> {
     'dateReceived': '2024-05-30',
     'dateCompleted': '',
     'status': 'Pending',
+    'documents': [
+      {'name': 'Buyer_ID.jpg', 'dateUploaded': '2024-05-30', 'size': '1.4 MB'},
+      {'name': 'Seller_ID.jpg', 'dateUploaded': '2024-05-30', 'size': '1.3 MB'},
+      {'name': 'Notary_POA.pdf', 'dateUploaded': '2024-05-30', 'size': '2.2 MB'},
+      {'name': 'Vehicle_Registration.pdf', 'dateUploaded': '2024-05-30', 'size': '1.8 MB'},
+    ],
   },
   {
     'icon': Icons.swap_horiz,
@@ -75,6 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
     'dateReceived': '2024-05-30',
     'dateCompleted': '',
     'status': 'Pending',
+    'documents': [],
   },
 ];
 
@@ -573,6 +592,7 @@ class _MyHomePageState extends State<MyHomePage> {
               dateReceived: t['dateReceived'],
               dateCompleted: t['dateCompleted'],
               imageUrls: [],
+              documents: t['documents'],
             ),
           ),
         );
