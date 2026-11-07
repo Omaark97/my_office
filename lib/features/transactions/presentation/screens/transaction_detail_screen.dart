@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class TransactionDetailPage extends StatefulWidget {
+class TransactionDetailScreen extends StatefulWidget {
   final String clientName;
   final String transactionType;
   final String status;
@@ -11,7 +11,7 @@ class TransactionDetailPage extends StatefulWidget {
   final int index;
   final Function(int) onMarkCompleted;
 
-  const TransactionDetailPage({
+  const TransactionDetailScreen({
     super.key,
     required this.clientName,
     required this.transactionType,
@@ -25,10 +25,11 @@ class TransactionDetailPage extends StatefulWidget {
   });
 
   @override
-  State<TransactionDetailPage> createState() => _TransactionDetailPageState();
+  State<TransactionDetailScreen> createState() =>
+      _TransactionDetailScreenState();
 }
 
-class _TransactionDetailPageState extends State<TransactionDetailPage> {
+class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-class DocumentGalleryPage extends StatelessWidget {
+class DocumentGalleryScreen extends StatelessWidget {
   final String title;
   final List<String> imageUrls;
 
-  const DocumentGalleryPage({
+  const DocumentGalleryScreen({
     super.key,
     required this.title,
     required this.imageUrls,
