@@ -1,134 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../formatters.dart';
+import '../transaction_icons.dart';
+import '../transaction_providers.dart';
+import '../../domain/transaction_status.dart';
 import 'document_gallery_screen.dart';
 import 'transaction_detail_screen.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key, required this.title});
   final String title;
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final transactions = ref.watch(transactionListProvider);
 
-class _HomeScreenState extends State<HomeScreen> {
-  List<Map<String, dynamic>> transactions = [
-    {
-      'icon': Icons.local_taxi,
-      'type': 'Public Taxi Registration',
-      'client': 'Test User 1',
-      'dateReceived': '2024-05-15',
-      'dateCompleted': '2024-05-15',
-      'status': 'Completed',
-      'documents': [
-        {
-          'name': 'ID_Front.jpg',
-          'dateUploaded': '2024-05-15',
-          'size': '1.2 MB',
-        },
-        {
-          'name': 'Taxi_License.pdf',
-          'dateUploaded': '2024-05-15',
-          'size': '2.5 MB',
-        },
-        {
-          'name': 'Sale_Deed.pdf',
-          'dateUploaded': '2024-05-15',
-          'size': '3.1 MB',
-        },
-      ],
-    },
-    {
-      'icon': Icons.card_membership,
-      'type': "Driver's License Renewal",
-      'client': 'Test User 2',
-      'dateReceived': '2024-06-01',
-      'dateCompleted': '',
-      'status': 'Pending',
-      'documents': [
-        {
-          'name': 'Current_License.jpg',
-          'dateUploaded': '2024-06-01',
-          'size': '1.2 MB',
-        },
-        {
-          'name': 'Proof_of_Residency.pdf',
-          'dateUploaded': '2024-06-01',
-          'size': '2.8 MB',
-        },
-      ],
-    },
-    {
-      'icon': Icons.lock_open,
-      'type': 'Lien Release',
-      'client': 'Test User 3',
-      'dateReceived': '2024-04-15',
-      'dateCompleted': '2024-04-20',
-      'status': 'Completed',
-      'documents': [
-        {
-          'name': 'Bank_Release_Letter.pdf',
-          'dateUploaded': '2024-04-15',
-          'size': '0.8 MB',
-        },
-      ],
-    },
-    {
-      'icon': Icons.directions_car,
-      'type': 'Private Car Ownership Transfer',
-      'client': 'Test User 4',
-      'dateReceived': '2024-05-30',
-      'dateCompleted': '',
-      'status': 'Pending',
-      'documents': [
-        {
-          'name': 'Buyer_ID.jpg',
-          'dateUploaded': '2024-05-30',
-          'size': '1.4 MB',
-        },
-        {
-          'name': 'Seller_ID.jpg',
-          'dateUploaded': '2024-05-30',
-          'size': '1.3 MB',
-        },
-        {
-          'name': 'Notary_POA.pdf',
-          'dateUploaded': '2024-05-30',
-          'size': '2.2 MB',
-        },
-        {
-          'name': 'Vehicle_Registration.pdf',
-          'dateUploaded': '2024-05-30',
-          'size': '1.8 MB',
-        },
-      ],
-    },
-    {
-      'icon': Icons.swap_horiz,
-      'type': 'Public Taxi Registration',
-      'client': 'Test User 5',
-      'dateReceived': '2024-05-30',
-      'dateCompleted': '',
-      'status': 'Pending',
-      'documents': [],
-    },
-  ];
-
-  void markAsCompleted(int index) {
-    setState(() {
-      transactions[index]['status'] = 'Completed';
-      transactions[index]['dateCompleted'] = DateTime.now().toString().split(
-        ' ',
-      )[0];
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFFF2F2F7),
-        title: Text(widget.title),
+        title: Text(title),
       ),
 
       body: Column(
@@ -582,47 +473,44 @@ class _HomeScreenState extends State<HomeScreen> {
                   borderRadius: BorderRadius.circular(16),
                 ),
 
-                child: ListView.builder(
-                  itemCount: transactions.length,
-                  itemBuilder: (context, index) {
-                    final t = transactions[index];
+                child: transactions.when(
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (error, stackTrace) =>
+                      const Center(child: Text('Could not load transactions')),
+                  data: (transactions) => ListView.builder(
+                    itemCount: transactions.length,
+                    itemBuilder: (context, index) {
+                      final t = transactions[index];
+                      final isCompleted =
+                          t.status == TransactionStatus.completed;
 
-                    return ListTile(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => TransactionDetailScreen(
-                              clientName: t['client'],
-                              transactionType: t['type'],
-                              status: t['status'],
-                              dateReceived: t['dateReceived'],
-                              dateCompleted: t['dateCompleted'],
-                              imageUrls: [],
-                              documents: t['documents'],
-                              index: index,
-                              onMarkCompleted: markAsCompleted,
+                      return ListTile(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  TransactionDetailScreen(transactionId: t.id),
                             ),
-                          ),
-                        );
-                      },
-                      leading: Icon(t['icon'], color: Colors.teal),
-                      title: Text(t['client']),
-                      subtitle: Text(
-                        t['status'] == 'Completed'
-                            ? 'Completed on ${t['dateCompleted']}'
-                            : 'Pending since ${t['dateReceived']}',
-                      ),
-                      trailing: Icon(
-                        t['status'] == 'Completed'
-                            ? Icons.check_circle
-                            : Icons.hourglass_empty,
-                        color: t['status'] == 'Completed'
-                            ? Colors.green
-                            : Colors.orange,
-                      ),
-                    );
-                  },
+                          );
+                        },
+                        leading: Icon(t.type.icon, color: Colors.teal),
+                        title: Text(t.clientName),
+                        subtitle: Text(
+                          isCompleted && t.dateCompleted != null
+                              ? 'Completed on ${formatDate(t.dateCompleted!)}'
+                              : 'Pending since ${formatDate(t.dateReceived)}',
+                        ),
+                        trailing: Icon(
+                          isCompleted
+                              ? Icons.check_circle
+                              : Icons.hourglass_empty,
+                          color: isCompleted ? Colors.green : Colors.orange,
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
