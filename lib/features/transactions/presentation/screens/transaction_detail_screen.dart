@@ -52,12 +52,14 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'TRANSACTION DETAILS',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                          letterSpacing: 1.2,
+                      const Flexible(
+                        child: Text(
+                          'TRANSACTION DETAILS',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                            letterSpacing: 1.2,
+                          ),
                         ),
                       ),
                       Container(
@@ -101,7 +103,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                         color: Colors.grey,
                       ),
                       const SizedBox(width: 8),
-                      Text('Received: ${widget.dateReceived}'),
+                      Flexible(child: Text('Received: ${widget.dateReceived}')),
                     ],
                   ),
                   if (widget.dateCompleted.isNotEmpty) ...[
@@ -114,7 +116,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                           color: Colors.green,
                         ),
                         const SizedBox(width: 8),
-                        Text('Completed: ${widget.dateCompleted}'),
+                        Flexible(
+                          child: Text('Completed: ${widget.dateCompleted}'),
+                        ),
                       ],
                     ),
                   ],
