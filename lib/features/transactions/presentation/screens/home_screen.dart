@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../app/routes.dart';
 import '../formatters.dart';
 import '../transaction_icons.dart';
 import '../transaction_providers.dart';
 import '../../domain/transaction_status.dart';
-import 'document_gallery_screen.dart';
-import 'transaction_detail_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key, required this.title});
@@ -44,14 +44,8 @@ class HomeScreen extends ConsumerWidget {
                 children: <Widget>[
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DocumentGalleryScreen(
-                            title: "Identification Documents",
-                            imageUrls: [],
-                          ),
-                        ),
+                      context.push(
+                        AppRoutes.gallery("Identification Documents"),
                       );
                     },
                     child: Card(
@@ -83,15 +77,7 @@ class HomeScreen extends ConsumerWidget {
                   //const SizedBox(width: 10),
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DocumentGalleryScreen(
-                            title: "Vehicle Sale Deeds",
-                            imageUrls: [],
-                          ),
-                        ),
-                      );
+                      context.push(AppRoutes.gallery("Vehicle Sale Deeds"));
                     },
                     child: Card(
                       shape: RoundedRectangleBorder(
@@ -126,15 +112,7 @@ class HomeScreen extends ConsumerWidget {
                   //const SizedBox(width: 10),
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DocumentGalleryScreen(
-                            title: "Sale Power of Attorney",
-                            imageUrls: [],
-                          ),
-                        ),
-                      );
+                      context.push(AppRoutes.gallery("Sale Power of Attorney"));
                     },
                     child: Card(
                       shape: RoundedRectangleBorder(
@@ -165,14 +143,8 @@ class HomeScreen extends ConsumerWidget {
                   //const SizedBox(width: 10),
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DocumentGalleryScreen(
-                            title: "Special/General Power of Attorney",
-                            imageUrls: [],
-                          ),
-                        ),
+                      context.push(
+                        AppRoutes.gallery("Special/General Power of Attorney"),
                       );
                     },
                     child: Card(
@@ -205,15 +177,7 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DocumentGalleryScreen(
-                            title: "Police Reports",
-                            imageUrls: [],
-                          ),
-                        ),
-                      );
+                      context.push(AppRoutes.gallery("Police Reports"));
                     },
                     child: Card(
                       shape: RoundedRectangleBorder(
@@ -247,14 +211,8 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DocumentGalleryScreen(
-                            title: "Inheritance Certificates",
-                            imageUrls: [],
-                          ),
-                        ),
+                      context.push(
+                        AppRoutes.gallery("Inheritance Certificates"),
                       );
                     },
                     child: Card(
@@ -291,15 +249,7 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DocumentGalleryScreen(
-                            title: "Lien Release",
-                            imageUrls: [],
-                          ),
-                        ),
-                      );
+                      context.push(AppRoutes.gallery("Lien Release"));
                     },
                     child: Card(
                       shape: RoundedRectangleBorder(
@@ -331,14 +281,8 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DocumentGalleryScreen(
-                            title: "Vehicle Scrap Certificate",
-                            imageUrls: [],
-                          ),
-                        ),
+                      context.push(
+                        AppRoutes.gallery("Vehicle Scrap Certificate"),
                       );
                     },
                     child: Card(
@@ -378,15 +322,7 @@ class HomeScreen extends ConsumerWidget {
 
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DocumentGalleryScreen(
-                            title: "Other",
-                            imageUrls: [],
-                          ),
-                        ),
-                      );
+                      context.push(AppRoutes.gallery("Other"));
                     },
 
                     child: Card(
@@ -487,13 +423,7 @@ class HomeScreen extends ConsumerWidget {
 
                       return ListTile(
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  TransactionDetailScreen(transactionId: t.id),
-                            ),
-                          );
+                          context.push(AppRoutes.transaction(t.id));
                         },
                         leading: Icon(t.type.icon, color: Colors.teal),
                         title: Text(t.clientName),
