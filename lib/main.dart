@@ -97,6 +97,13 @@ class _MyHomePageState extends State<MyHomePage> {
   },
 ];
 
+void markAsCompleted(int index) {
+  setState(() {
+    transactions[index]['status'] = 'Completed';
+    transactions[index]['dateCompleted'] = DateTime.now().toString().split(' ')[0];
+  });
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -593,6 +600,8 @@ class _MyHomePageState extends State<MyHomePage> {
               dateCompleted: t['dateCompleted'],
               imageUrls: [],
               documents: t['documents'],
+              index: index,                         
+              onMarkCompleted: markAsCompleted, 
             ),
           ),
         );

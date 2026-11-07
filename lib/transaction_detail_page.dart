@@ -8,6 +8,8 @@ class TransactionDetailPage extends StatefulWidget {
   final String dateCompleted;
   final List<String> imageUrls;
   final List<Map<String, dynamic>> documents;
+  final int index;                              
+  final Function(int) onMarkCompleted;   
 
   const TransactionDetailPage({
     super.key,
@@ -18,6 +20,8 @@ class TransactionDetailPage extends StatefulWidget {
     required this.dateCompleted,
     required this.imageUrls,
     required this.documents,
+    required this.index,                       
+    required this.onMarkCompleted, 
   });
 
   @override
@@ -162,9 +166,9 @@ class _TransactionDetailPageState extends State<TransactionDetailPage> {
 
             const SizedBox(height: 16),
 
-// ═══════════════════════════════════
-// SECTION 3: DOCUMENTS CARD
-// ═══════════════════════════════════
+
+
+
 Container(
   width: double.infinity,
   padding: const EdgeInsets.all(20),
@@ -271,7 +275,7 @@ Container(
           }).toList(),
         ),
 
-      // 👇 NEW: upload zone — INSIDE the Documents card now
+      
       const SizedBox(height: 8),
       GestureDetector(
         onTap: () {
@@ -326,11 +330,8 @@ Container(
 
 const SizedBox(height: 24),
 
-// ═══════════════════════════════════
-// SECTION 4: ACTION BUTTONS
-// ═══════════════════════════════════
 
-// Complete Transaction button (primary)
+
 SizedBox(
   width: double.infinity,
   child: ElevatedButton(
