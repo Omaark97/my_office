@@ -59,7 +59,7 @@ app.*.map.json
 # User uploads / scanned documents
 uploads/
 scanned_documents/
-documents/
+/documents/
 
 # Sensitive images (real client documents)
 # Note: 'images/' folder for app assets is fine, but be careful what goes in there
