@@ -485,7 +485,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const SizedBox(height: 17),
+                            const SizedBox(height: 8),
                             Icon(
                               Icons.delete_forever,
                               size: 32,
@@ -497,6 +497,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               "Vehicle Scrap Certificate",
                               style: TextStyle(fontSize: 11),
                               textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ),
