@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'My Office',
       theme: ThemeData(
         // make the whole app's Scaffold background this color
         scaffoldBackgroundColor: const Color(0xFFF2F2F7),
