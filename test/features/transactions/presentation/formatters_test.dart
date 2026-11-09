@@ -4,14 +4,10 @@ import 'package:my_office/features/transactions/presentation/formatters.dart';
 void main() {
   group('formatDate', () {
     test('pads month and day with zeros', () {
-      // Noon UTC is the same calendar day in Beirut and in UTC (the CI
-      // machine), so this test gives the same result on both.
       expect(formatDate(DateTime.utc(2024, 5, 3, 12)), '2024-05-03');
     });
 
     test('shows a local time as its own local date', () {
-      // Late evening in whatever time zone the test runs in. Because the
-      // value is already local, it must show that same date everywhere.
       expect(formatDate(DateTime(2024, 5, 15, 23, 30)), '2024-05-15');
       expect(formatDate(DateTime(2024, 5, 15, 0, 30)), '2024-05-15');
     });
@@ -25,9 +21,9 @@ void main() {
 
   group('formatFileSize', () {
     test('shows megabytes with one decimal, like the old test data', () {
-      expect(formatFileSize(1258291), '1.2 MB'); // 1.2 MB
-      expect(formatFileSize(838861), '0.8 MB'); // 0.8 MB
-      expect(formatFileSize(3250586), '3.1 MB'); // 3.1 MB
+      expect(formatFileSize(1258291), '1.2 MB');
+      expect(formatFileSize(838861), '0.8 MB');
+      expect(formatFileSize(3250586), '3.1 MB');
     });
 
     test('shows small files in kilobytes and bytes', () {

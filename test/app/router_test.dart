@@ -8,8 +8,6 @@ import 'package:my_office/features/transactions/presentation/transaction_provide
 
 import '../test_helpers.dart';
 
-/// Starts the whole app with the in-memory test data and returns its
-/// provider container, so tests can also drive the router directly.
 Future<ProviderContainer> _pumpApp(WidgetTester tester) async {
   useIPhoneScreen(tester);
   final container = ProviderContainer.test(
@@ -60,7 +58,6 @@ void main() {
     await tester.tap(find.text('Identification Documents'));
     await tester.pumpAndSettle();
 
-    // The gallery's app bar shows the card title.
     expect(find.text('Identification Documents'), findsOneWidget);
     expect(find.text('Quick Access'), findsNothing);
   });

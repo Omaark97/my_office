@@ -5,12 +5,7 @@ import '../domain/transaction_status.dart';
 import '../domain/transaction_type.dart';
 import 'transaction_repository.dart';
 
-/// A [TransactionRepository] that keeps everything in memory.
-///
-/// Used by the app until Firestore is added (step 3), and by tests. Changes
-/// are lost when the app restarts.
 class InMemoryTransactionRepository implements TransactionRepository {
-  /// Starts with the given data, or with the fake test data if none is given.
   InMemoryTransactionRepository({
     List<Transaction>? transactions,
     Map<String, List<TransactionDocument>>? documents,
@@ -49,20 +44,11 @@ class InMemoryTransactionRepository implements TransactionRepository {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Fake test data. Names are fake on purpose: never put real client data here.
-// ---------------------------------------------------------------------------
-
 const _staffUid = 'test-staff-uid';
 
-/// A calendar day at 12:00 UTC.
-///
-/// Noon UTC falls on the same calendar day in every time zone from UTC-11 to
-/// UTC+11, so the dates show the same in Beirut and on the UTC CI machine.
 DateTime _day(int year, int month, int day) =>
     DateTime.utc(year, month, day, 12);
 
-/// A size in megabytes, as whole bytes.
 int _megabytes(double mb) => (mb * 1024 * 1024).round();
 
 List<Transaction> _testTransactions() {

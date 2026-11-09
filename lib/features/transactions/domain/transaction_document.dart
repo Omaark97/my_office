@@ -1,10 +1,6 @@
 import 'document_category.dart';
 import 'map_reading.dart';
 
-/// A scanned document (image or PDF) attached to a transaction.
-///
-/// Only the details are stored here. The file itself lives in file storage
-/// at [storagePath].
 class TransactionDocument {
   TransactionDocument({
     required this.id,
@@ -17,25 +13,18 @@ class TransactionDocument {
     required this.storagePath,
   }) : uploadedAt = uploadedAt.toUtc();
 
-  /// The database document id. It is not stored inside [toMap].
   final String id;
 
-  /// The file name shown to the user, for example "ID_Front.jpg".
   final String name;
 
-  /// For example "image/jpeg" or "application/pdf".
   final String mimeType;
   final int sizeBytes;
   final DocumentCategory category;
 
-  /// Kept in UTC.
   final DateTime uploadedAt;
 
-  /// The uid of the staff member who uploaded it.
   final String uploadedBy;
 
-  /// Where the file is, for example "transactions/abc/documents/xyz.jpg".
-  /// Never a download link.
   final String storagePath;
 
   bool get isPdf => mimeType == 'application/pdf';
@@ -52,8 +41,6 @@ class TransactionDocument {
     };
   }
 
-  /// Rebuilds a document from saved fields. Throws a [FormatException] if a
-  /// field is missing or invalid.
   factory TransactionDocument.fromMap(String id, Map<String, dynamic> map) {
     return TransactionDocument(
       id: id,

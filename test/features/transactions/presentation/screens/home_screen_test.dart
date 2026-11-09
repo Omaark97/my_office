@@ -11,7 +11,6 @@ import 'package:my_office/features/transactions/presentation/transaction_provide
 
 import '../../../../test_helpers.dart';
 
-/// A repository whose loading always fails, to test the error message.
 class _FailingRepository implements TransactionRepository {
   @override
   Future<List<Transaction>> getTransactions() async =>
@@ -37,7 +36,6 @@ Future<void> _pumpHome(
   useIPhoneScreen(tester);
   await tester.pumpWidget(
     ProviderScope(
-      // Don't retry failed loads in tests; fail at once.
       retry: (retryCount, error) => null,
       overrides: [transactionRepositoryProvider.overrideWithValue(repository)],
       child: const MaterialApp(home: HomeScreen(title: 'Home')),
@@ -67,12 +65,9 @@ void main() {
   testWidgets('shows the icon of each transaction type', (tester) async {
     await _pumpHome(tester, repository: InMemoryTransactionRepository());
 
-    // Only look inside the transaction rows, not the Quick Access cards.
     Finder rowIcon(IconData icon) =>
         find.descendant(of: find.byType(ListTile), matching: find.byIcon(icon));
 
-    // Test User 1 and 5 are taxi registrations, Test User 2 a license
-    // renewal, Test User 3 a lien release, Test User 4 an ownership transfer.
     expect(rowIcon(Icons.local_taxi), findsNWidgets(2));
     expect(rowIcon(Icons.card_membership), findsOneWidget);
     expect(rowIcon(Icons.lock_open), findsOneWidget);

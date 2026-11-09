@@ -2,11 +2,6 @@ import 'map_reading.dart';
 import 'transaction_status.dart';
 import 'transaction_type.dart';
 
-/// One piece of work the office does for a client, such as an ownership
-/// transfer.
-///
-/// All dates are kept in UTC (the constructor converts them). Screens convert
-/// them to the phone's local time only when showing them.
 class Transaction {
   Transaction({
     required this.id,
@@ -25,28 +20,22 @@ class Transaction {
        createdAt = createdAt.toUtc(),
        updatedAt = updatedAt.toUtc();
 
-  /// The database document id. It is not stored inside [toMap].
   final String id;
   final TransactionType type;
 
-  /// The client's name as typed. May be Arabic or English.
   final String clientName;
   final String? clientPhone;
 
-  /// Links to the future customer app. Always null for now.
   final String? customerId;
   final TransactionStatus status;
   final DateTime dateReceived;
 
-  /// Set when the transaction is completed.
   final DateTime? dateCompleted;
 
-  /// The uid of the staff member who created it.
   final String createdBy;
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  /// Returns a copy with a new status. Used by the status-change methods.
   Transaction copyWith({
     TransactionStatus? status,
     DateTime? dateCompleted,
@@ -67,7 +56,6 @@ class Transaction {
     );
   }
 
-  /// The fields to save. Enums are saved by their fixed key.
   Map<String, dynamic> toMap() {
     return {
       'type': type.key,
@@ -83,8 +71,6 @@ class Transaction {
     };
   }
 
-  /// Rebuilds a transaction from saved fields. Throws a [FormatException] if
-  /// a field is missing or invalid.
   factory Transaction.fromMap(String id, Map<String, dynamic> map) {
     return Transaction(
       id: id,

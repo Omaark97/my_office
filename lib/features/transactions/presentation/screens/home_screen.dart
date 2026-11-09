@@ -74,7 +74,6 @@ class HomeScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  //const SizedBox(width: 10),
                   GestureDetector(
                     onTap: () {
                       context.push(AppRoutes.gallery("Vehicle Sale Deeds"));
@@ -109,7 +108,6 @@ class HomeScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  //const SizedBox(width: 10),
                   GestureDetector(
                     onTap: () {
                       context.push(AppRoutes.gallery("Sale Power of Attorney"));
@@ -140,7 +138,6 @@ class HomeScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  //const SizedBox(width: 10),
                   GestureDetector(
                     onTap: () {
                       context.push(

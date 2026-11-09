@@ -221,7 +221,6 @@ class TransactionDetailScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // Conditional: show list OR empty state
                 if (documents.isEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 20),
@@ -290,9 +289,7 @@ class TransactionDetailScreen extends ConsumerWidget {
                                 Icons.download,
                                 color: Colors.grey.shade600,
                               ),
-                              onPressed: () {
-                                // TODO: download functionality (future)
-                              },
+                              onPressed: () {},
                             ),
                           ],
                         ),
@@ -361,7 +358,6 @@ class TransactionDetailScreen extends ConsumerWidget {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                // TODO: Phase 2 will wire this up to mark as completed
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text(
@@ -389,12 +385,10 @@ class TransactionDetailScreen extends ConsumerWidget {
 
           const SizedBox(height: 12),
 
-          // Cancel Transaction button (secondary)
           SizedBox(
             width: double.infinity,
             child: OutlinedButton(
               onPressed: () {
-                // TODO: Phase 2 will wire this up to mark as cancelled
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Cancel Transaction tapped'),
@@ -417,7 +411,7 @@ class TransactionDetailScreen extends ConsumerWidget {
             ),
           ),
 
-          const SizedBox(height: 24), // bottom breathing room when scrolled
+          const SizedBox(height: 24),
         ],
       ),
     );

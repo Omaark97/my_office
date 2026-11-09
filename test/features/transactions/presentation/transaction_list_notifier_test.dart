@@ -5,7 +5,6 @@ import 'package:my_office/features/transactions/domain/transaction_status.dart';
 import 'package:my_office/features/transactions/presentation/transaction_providers.dart';
 
 void main() {
-  // A fixed "now" so the tests give the same result on any machine.
   final fixedNow = DateTime.utc(2024, 7, 1, 12);
 
   late InMemoryTransactionRepository repository;
@@ -71,7 +70,6 @@ void main() {
   });
 
   test('markCompleted rejects a transaction that is not pending', () async {
-    // test-1 is already completed in the test data.
     final notifier = container.read(transactionListProvider.notifier);
 
     await expectLater(notifier.markCompleted('test-1'), throwsStateError);
