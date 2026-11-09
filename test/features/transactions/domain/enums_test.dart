@@ -4,8 +4,6 @@ import 'package:my_office/features/transactions/domain/transaction_status.dart';
 import 'package:my_office/features/transactions/domain/transaction_type.dart';
 
 void main() {
-  // These tests lock the saved keys. If one fails, someone renamed a key that
-  // is already stored in the database. Add a new value instead.
   group('TransactionType', () {
     test('has exactly the agreed keys', () {
       expect(TransactionType.values.map((t) => t.key), [

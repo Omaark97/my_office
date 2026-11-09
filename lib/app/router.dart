@@ -6,10 +6,6 @@ import '../features/transactions/presentation/screens/home_screen.dart';
 import '../features/transactions/presentation/screens/transaction_detail_screen.dart';
 import 'routes.dart';
 
-/// The app's navigation.
-///
-/// It is a provider so that in step 2 it can watch the login state and
-/// redirect to the login screen when nobody is signed in.
 final routerProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
     initialLocation: AppRoutes.home,

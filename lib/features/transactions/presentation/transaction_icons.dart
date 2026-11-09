@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 import '../domain/document_category.dart';
 import '../domain/transaction_type.dart';
 
-// Icons live here, not in the domain enums, because the domain layer must
-// not import Flutter.
-
 extension TransactionTypeIcon on TransactionType {
   IconData get icon {
     switch (this) {

@@ -1,7 +1,3 @@
-/// What kind of paper a scanned document is.
-///
-/// Each value has a fixed [key] that is saved in the database. Never change
-/// an existing key. The [label] is only for display.
 enum DocumentCategory {
   identification('identification', 'Identification Documents'),
   saleDeed('saleDeed', 'Vehicle Sale Deeds'),
@@ -18,8 +14,6 @@ enum DocumentCategory {
   final String key;
   final String label;
 
-  /// Finds the category saved under [key]. Throws a [FormatException] for an
-  /// unknown key.
   static DocumentCategory fromKey(String key) {
     for (final category in values) {
       if (category.key == key) return category;

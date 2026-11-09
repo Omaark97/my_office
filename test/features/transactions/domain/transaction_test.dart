@@ -66,7 +66,6 @@ void main() {
   });
 
   test('dates are always kept in UTC, whatever the input time zone', () {
-    // An instant given with a +03:00 offset (Beirut summer time).
     final beirutTime = DateTime.parse('2024-05-15T14:00:00+03:00');
 
     final transaction = Transaction(
