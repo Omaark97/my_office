@@ -1,5 +1,7 @@
 abstract final class AppRoutes {
   static const home = '/';
+  static const login = '/login';
+  static const loading = '/loading';
 
   static const transactionPattern = '/transactions/:id';
   static String transaction(String id) => '/transactions/$id';

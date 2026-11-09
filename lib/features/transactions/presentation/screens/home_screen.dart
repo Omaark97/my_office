@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/routes.dart';
+import '../../../auth/presentation/auth_providers.dart';
 import '../formatters.dart';
 import '../transaction_icons.dart';
 import '../transaction_providers.dart';
@@ -20,6 +21,14 @@ class HomeScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFFF2F2F7),
         title: Text(title),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.teal),
+            tooltip: 'Sign out',
+            onPressed: () =>
+                ref.read(authControllerProvider.notifier).signOut(),
+          ),
+        ],
       ),
 
       body: Column(
