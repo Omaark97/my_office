@@ -70,6 +70,7 @@ Progress is iterative — small commits, daily improvements.
 
 - Flutter **3.41.9** (the same version CI uses, see `.github/workflows/ci.yml`)
 - Xcode and CocoaPods (iOS only; the app targets iOS 15+)
+- For the Firestore rules tests and deploying rules: Node **24.12+** and Java **21**
 
 ### Firebase (one-time)
 
@@ -89,6 +90,50 @@ Firestore and Storage both use **`europe-west1` (Belgium)**. The location is per
 
 - Firestore database: when Firestore is added.
 - Storage bucket: when document uploads are added.
+
+### Firestore (one-time)
+
+1. **Firestore Database → Create database:** Standard edition, location **`europe-west1`**, start in **production mode**.
+2. **Add yourself to the staff list.** Only accounts on this list can read or write transactions.
+   1. In **Authentication → Users**, copy your **User UID**.
+   2. In **Firestore**, start a collection named `staff`, with a document whose **Document ID is your UID** and one field `email` (string) with your email.
+3. **Deploy the security rules and indexes** from the project root:
+
+   ```bash
+   (cd rules_test && npm ci)
+   rules_test/node_modules/.bin/firebase login
+   rules_test/node_modules/.bin/firebase deploy --only firestore --project YOUR_PROJECT_ID
+   ```
+
+   Your project ID is shown in the Firebase console under **Project settings**.
+
+#### Optional: a fake transaction for testing
+
+Until the app can add transactions, you can add one by hand in **Firestore → transactions → Add document** (auto ID). Use fake names only.
+
+| Field | Type | Example |
+|---|---|---|
+| `type` | string | `lienRelease` |
+| `clientName` | string | `Test User 1` |
+| `clientNameLower` | string | `test user 1` |
+| `clientPhone` | null | |
+| `customerId` | null | |
+| `status` | string | `pending` |
+| `dateReceived` | timestamp | any date |
+| `dateCompleted` | null | |
+| `createdBy` | string | your User UID |
+| `createdAt` | timestamp | now |
+| `updatedAt` | timestamp | now |
+
+### Firestore rules tests
+
+The rules in `firestore.rules` are tested against the local Firestore emulator. The tests use a `demo-` project, so they never touch the real database.
+
+```bash
+cd rules_test
+npm ci
+npm run test:emulator
+```
 
 ### Storage: Blaze plan and budget alert
 
