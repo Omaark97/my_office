@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/routes.dart';
 import '../../../auth/presentation/auth_providers.dart';
 import '../formatters.dart';
+import '../load_error_message.dart';
 import '../transaction_icons.dart';
 import '../transaction_providers.dart';
 import '../../domain/transaction_status.dart';
@@ -418,35 +419,54 @@ class HomeScreen extends ConsumerWidget {
                 child: transactions.when(
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
-                  error: (error, stackTrace) =>
-                      const Center(child: Text('Could not load transactions')),
-                  data: (transactions) => ListView.builder(
-                    itemCount: transactions.length,
-                    itemBuilder: (context, index) {
-                      final t = transactions[index];
-                      final isCompleted =
-                          t.status == TransactionStatus.completed;
-
-                      return ListTile(
-                        onTap: () {
-                          context.push(AppRoutes.transaction(t.id));
-                        },
-                        leading: Icon(t.type.icon, color: Colors.teal),
-                        title: Text(t.clientName),
-                        subtitle: Text(
-                          isCompleted && t.dateCompleted != null
-                              ? 'Completed on ${formatDate(t.dateCompleted!)}'
-                              : 'Pending since ${formatDate(t.dateReceived)}',
+                  error: (error, stackTrace) => Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(
+                        loadErrorMessage(
+                          error,
+                          fallback: 'Could not load transactions',
                         ),
-                        trailing: Icon(
-                          isCompleted
-                              ? Icons.check_circle
-                              : Icons.hourglass_empty,
-                          color: isCompleted ? Colors.green : Colors.orange,
-                        ),
-                      );
-                    },
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   ),
+                  data: (transactions) => transactions.isEmpty
+                      ? Center(
+                          child: Text(
+                            'No transactions yet',
+                            style: TextStyle(color: Colors.grey.shade500),
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: transactions.length,
+                          itemBuilder: (context, index) {
+                            final t = transactions[index];
+                            final isCompleted =
+                                t.status == TransactionStatus.completed;
+
+                            return ListTile(
+                              onTap: () {
+                                context.push(AppRoutes.transaction(t.id));
+                              },
+                              leading: Icon(t.type.icon, color: Colors.teal),
+                              title: Text(t.clientName),
+                              subtitle: Text(
+                                isCompleted && t.dateCompleted != null
+                                    ? 'Completed on ${formatDate(t.dateCompleted!)}'
+                                    : 'Pending since ${formatDate(t.dateReceived)}',
+                              ),
+                              trailing: Icon(
+                                isCompleted
+                                    ? Icons.check_circle
+                                    : Icons.hourglass_empty,
+                                color: isCompleted
+                                    ? Colors.green
+                                    : Colors.orange,
+                              ),
+                            );
+                          },
+                        ),
                 ),
               ),
             ),

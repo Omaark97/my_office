@@ -1,13 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/in_memory_transaction_repository.dart';
+import '../data/firestore_transaction_repository.dart';
 import '../data/transaction_repository.dart';
 import '../domain/transaction.dart';
 import '../domain/transaction_document.dart';
 import '../domain/transaction_status.dart';
 
 final transactionRepositoryProvider = Provider<TransactionRepository>(
-  (ref) => InMemoryTransactionRepository(),
+  (ref) => FirestoreTransactionRepository(),
 );
 
 final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
