@@ -36,17 +36,12 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
       );
     }
 
-    final now = ref.read(clockProvider)().toUtc();
     await ref
         .read(transactionRepositoryProvider)
-        .updateStatus(
-          id,
-          status: TransactionStatus.completed,
-          dateCompleted: now,
-          updatedAt: now,
-        );
+        .updateStatus(id, TransactionStatus.completed);
 
     if (!ref.mounted) return;
+    final now = ref.read(clockProvider)().toUtc();
     state = AsyncData([
       for (final t in transactions)
         if (t.id == id)

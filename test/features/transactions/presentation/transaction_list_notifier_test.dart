@@ -11,7 +11,7 @@ void main() {
   late ProviderContainer container;
 
   setUp(() {
-    repository = InMemoryTransactionRepository();
+    repository = InMemoryTransactionRepository(clock: () => fixedNow);
     container = ProviderContainer.test(
       overrides: [
         transactionRepositoryProvider.overrideWithValue(repository),

@@ -21,12 +21,7 @@ class _FailingRepository implements TransactionRepository {
       const [];
 
   @override
-  Future<void> updateStatus(
-    String id, {
-    required TransactionStatus status,
-    DateTime? dateCompleted,
-    required DateTime updatedAt,
-  }) async {}
+  Future<void> updateStatus(String id, TransactionStatus status) async {}
 }
 
 Future<void> _pumpHome(
