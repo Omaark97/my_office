@@ -3,9 +3,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:my_office/app/app.dart';
 import 'package:my_office/app/router.dart';
 import 'package:my_office/app/routes.dart';
+import 'package:my_office/features/auth/presentation/auth_providers.dart';
 import 'package:my_office/features/transactions/data/in_memory_transaction_repository.dart';
 import 'package:my_office/features/transactions/presentation/transaction_providers.dart';
 
+import '../features/auth/fake_auth_repository.dart';
 import '../test_helpers.dart';
 
 Future<ProviderContainer> _pumpApp(WidgetTester tester) async {
@@ -14,6 +16,9 @@ Future<ProviderContainer> _pumpApp(WidgetTester tester) async {
     overrides: [
       transactionRepositoryProvider.overrideWithValue(
         InMemoryTransactionRepository(),
+      ),
+      authRepositoryProvider.overrideWithValue(
+        FakeAuthRepository(signedInUser: testUser),
       ),
     ],
   );
