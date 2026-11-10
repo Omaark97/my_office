@@ -31,3 +31,38 @@ jobs:
 
       - name: Run tests
         run: flutter test
+
+  firestore-rules:
+    name: Firestore rules tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rules_test
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v7
+
+      - name: Install Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: rules_test/package-lock.json
+
+      - name: Install Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Cache Firebase emulators
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/firebase/emulators
+          key: firebase-emulators-${{ hashFiles('rules_test/package-lock.json') }}
+
+      - name: Install test packages
+        run: npm ci
+
+      - name: Run rules tests on the emulator
+        run: npm run test:emulator
