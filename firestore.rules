@@ -140,8 +140,8 @@ service cloud.firestore {
         && (isClientDetailsCorrection() || isCompletion() || isCancellation());
     }
 
-    function isPendingTransaction(transactionId) {
-      return get(/databases/$(database)/documents/transactions/$(transactionId)).data.status == 'pending';
+    function acceptsNewDocuments(transactionId) {
+      return get(/databases/$(database)/documents/transactions/$(transactionId)).data.status in ['pending', 'completed'];
     }
 
     function isValidNewDocument(transactionId, documentId, data) {
@@ -173,7 +173,7 @@ service cloud.firestore {
       match /documents/{documentId} {
         allow read: if isStaff();
         allow create: if isStaff()
-          && isPendingTransaction(transactionId)
+          && acceptsNewDocuments(transactionId)
           && isValidNewDocument(transactionId, documentId, request.resource.data);
         allow update, delete: if false;
       }
