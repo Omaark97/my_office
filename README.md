@@ -35,11 +35,11 @@ My family runs a notary services office that handles dozens of vehicle ownership
 - Clean Material Design UI built with custom widgets
 
 ### 🛠️ Coming next
-- [ ] Firebase Authentication (Admin login)
+- [x] Firebase Authentication (Admin login)
 - [ ] Firestore integration for transaction data
 - [ ] Document scanning via camera
 - [ ] Firebase Storage for scanned documents and PDFs
-- [ ] Transaction details screen
+- [x] Transaction details screen
 - [ ] Filter by document type
 
 ---
@@ -103,7 +103,7 @@ Budget alerts only send notifications. They do **not** stop charges.
 
 ```bash
 flutter pub get
-flutter run --release   # on a connected iPhone
+flutter run --release
 flutter test
 ```
 
