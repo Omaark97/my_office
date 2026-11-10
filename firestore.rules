@@ -1,0 +1,182 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isStaff() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/staff/$(request.auth.uid));
+    }
+
+    function transactionTypes() {
+      return [
+        'privateCarRegistration',
+        'motorcycleRegistration',
+        'privateCarOwnershipTransfer',
+        'motorcycleOwnershipTransfer',
+        'lienRelease',
+        'publicTaxiRegistration',
+        'privateFreightRegistration',
+        'licenseRenewal',
+        'specialPlateAllocation',
+        'other'
+      ];
+    }
+
+    function documentCategories() {
+      return [
+        'identification',
+        'saleDeed',
+        'salePowerOfAttorney',
+        'powerOfAttorney',
+        'policeReport',
+        'inheritanceCertificate',
+        'lienRelease',
+        'scrapCertificate',
+        'other'
+      ];
+    }
+
+    function allowedMimeTypes() {
+      return ['image/jpeg', 'image/png', 'application/pdf'];
+    }
+
+    function maxDocumentBytes() {
+      return 10 * 1024 * 1024;
+    }
+
+    function transactionFields() {
+      return [
+        'type',
+        'clientName',
+        'clientNameLower',
+        'clientPhone',
+        'customerId',
+        'status',
+        'dateReceived',
+        'dateCompleted',
+        'createdBy',
+        'createdAt',
+        'updatedAt'
+      ];
+    }
+
+    function documentFields() {
+      return [
+        'name',
+        'mimeType',
+        'sizeBytes',
+        'category',
+        'uploadedAt',
+        'uploadedBy',
+        'storagePath'
+      ];
+    }
+
+    function isNonEmptyString(value) {
+      return value is string && value.size() > 0;
+    }
+
+    function isOptionalString(value) {
+      return value == null || value is string;
+    }
+
+    function hasExactly(data, fields) {
+      return data.keys().hasAll(fields) && data.keys().hasOnly(fields);
+    }
+
+    function hasValidClientDetails(data) {
+      return isNonEmptyString(data.clientName)
+        && isNonEmptyString(data.clientNameLower)
+        && isOptionalString(data.clientPhone)
+        && data.type in transactionTypes();
+    }
+
+    function isValidNewTransaction(data) {
+      return hasExactly(data, transactionFields())
+        && hasValidClientDetails(data)
+        && data.status == 'pending'
+        && data.customerId == null
+        && data.dateReceived is timestamp
+        && data.dateCompleted == null
+        && data.createdBy == request.auth.uid
+        && data.createdAt == request.time
+        && data.updatedAt == request.time;
+    }
+
+    function changedFields() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    function isClientDetailsCorrection() {
+      return changedFields().hasOnly([
+          'clientName',
+          'clientNameLower',
+          'clientPhone',
+          'type',
+          'updatedAt'
+        ])
+        && hasValidClientDetails(request.resource.data);
+    }
+
+    function isCompletion() {
+      return changedFields().hasOnly(['status', 'dateCompleted', 'updatedAt'])
+        && request.resource.data.status == 'completed'
+        && request.resource.data.dateCompleted == request.time;
+    }
+
+    function isCancellation() {
+      return changedFields().hasOnly(['status', 'updatedAt'])
+        && request.resource.data.status == 'cancelled';
+    }
+
+    function isAllowedChangeToPendingTransaction() {
+      return resource.data.status == 'pending'
+        && request.resource.data.updatedAt == request.time
+        && (isClientDetailsCorrection() || isCompletion() || isCancellation());
+    }
+
+    function isPendingTransaction(transactionId) {
+      return get(/databases/$(database)/documents/transactions/$(transactionId)).data.status == 'pending';
+    }
+
+    function isValidNewDocument(transactionId, documentId, data) {
+      return hasExactly(data, documentFields())
+        && isNonEmptyString(data.name)
+        && data.mimeType in allowedMimeTypes()
+        && data.sizeBytes is int
+        && data.sizeBytes > 0
+        && data.sizeBytes <= maxDocumentBytes()
+        && data.category in documentCategories()
+        && data.uploadedAt == request.time
+        && data.uploadedBy == request.auth.uid
+        && data.storagePath.matches(
+          'transactions/' + transactionId + '/documents/' + documentId + '[.](jpg|jpeg|png|pdf)'
+        );
+    }
+
+    match /staff/{uid} {
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    match /transactions/{transactionId} {
+      allow read: if isStaff();
+      allow create: if isStaff() && isValidNewTransaction(request.resource.data);
+      allow update: if isStaff() && isAllowedChangeToPendingTransaction();
+      allow delete: if false;
+
+      match /documents/{documentId} {
+        allow read: if isStaff();
+        allow create: if isStaff()
+          && isPendingTransaction(transactionId)
+          && isValidNewDocument(transactionId, documentId, request.resource.data);
+        allow update, delete: if false;
+      }
+    }
+  }
+}
