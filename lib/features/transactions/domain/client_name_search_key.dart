@@ -1,10 +1,10 @@
-final _arabicDiacriticsAndTatweel = RegExp('[ً-ٰٟـ]');
-final _alefWithHamzaOrMadda = RegExp('[آأإ]');
-const _plainAlef = 'ا';
-const _taMarbuta = 'ة';
-const _ha = 'ه';
-const _alefMaqsura = 'ى';
-const _ya = 'ي';
+final _arabicDiacriticsAndTatweel = RegExp('[\u064B-\u065F\u0670\u0640]');
+final _alefWithHamzaOrMadda = RegExp('[\u0622\u0623\u0625]');
+const _plainAlef = '\u0627';
+const _taMarbuta = '\u0629';
+const _ha = '\u0647';
+const _alefMaqsura = '\u0649';
+const _ya = '\u064A';
 final _whitespaceRun = RegExp(r'\s+');
 
 String clientNameSearchKey(String clientName) {
