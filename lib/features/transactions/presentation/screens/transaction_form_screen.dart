@@ -54,11 +54,15 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   }
 
   Future<void> _pickDate() async {
+    final today = _today;
+    final startDay = _receivedDay.isBefore(earliestReceivedDay)
+        ? earliestReceivedDay
+        : (_receivedDay.isAfter(today) ? today : _receivedDay);
     final picked = await showDatePicker(
       context: context,
-      initialDate: _receivedDay,
+      initialDate: startDay,
       firstDate: earliestReceivedDay,
-      lastDate: _today,
+      lastDate: today,
     );
     if (picked != null) setState(() => _receivedDay = picked);
   }

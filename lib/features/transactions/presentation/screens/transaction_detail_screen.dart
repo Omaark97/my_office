@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../../app/routes.dart';
 
 import '../../domain/transaction.dart';
 import '../../domain/transaction_document.dart';
@@ -20,8 +23,21 @@ class TransactionDetailScreen extends ConsumerWidget {
     final transactionAsync = ref.watch(transactionProvider(transactionId));
     final documents = ref.watch(transactionDocumentsProvider(transactionId));
 
+    final canEdit = transactionAsync.value?.status == TransactionStatus.pending;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Transaction Details')),
+      appBar: AppBar(
+        title: const Text('Transaction Details'),
+        actions: [
+          if (canEdit)
+            IconButton(
+              icon: const Icon(Icons.edit_outlined, color: Colors.teal),
+              tooltip: 'Edit',
+              onPressed: () =>
+                  context.push(AppRoutes.editTransaction(transactionId)),
+            ),
+        ],
+      ),
       body: transactionAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) => Center(
