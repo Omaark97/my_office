@@ -125,4 +125,15 @@ void main() {
     expect(find.text('Test User Old'), findsOneWidget);
     expect(find.text('Received: 1985-03-01'), findsOneWidget);
   });
+
+  testWidgets('shows a grey "Cancelled" badge', (tester) async {
+    final repository = InMemoryTransactionRepository();
+    await repository.updateStatus('test-4', TransactionStatus.cancelled);
+
+    await _pumpDetail(tester, 'test-4', repository: repository);
+
+    final badgeText = tester.widget<Text>(find.text('Cancelled'));
+    expect(badgeText.style!.color, Colors.grey.shade700);
+    expect(find.textContaining('Completed:'), findsNothing);
+  });
 }

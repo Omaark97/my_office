@@ -5,6 +5,7 @@ import 'package:my_office/features/transactions/data/in_memory_transaction_repos
 import 'package:my_office/features/transactions/data/transaction_repository.dart';
 import 'package:my_office/features/transactions/domain/archive_access_denied_exception.dart';
 import 'package:my_office/features/transactions/domain/transaction.dart';
+import 'package:my_office/features/transactions/domain/transaction_status.dart';
 import 'package:my_office/features/transactions/presentation/load_error_message.dart';
 import 'package:my_office/features/transactions/presentation/screens/home_screen.dart';
 import 'package:my_office/features/transactions/presentation/transaction_providers.dart';
@@ -116,5 +117,21 @@ void main() {
 
     expect(find.text('No transactions yet'), findsOneWidget);
     expect(find.byType(ListTile), findsNothing);
+  });
+
+  testWidgets('shows a cancelled transaction in grey with its date', (
+    tester,
+  ) async {
+    final repository = InMemoryTransactionRepository(
+      clock: () => DateTime.utc(2024, 6, 10, 12),
+    );
+    await repository.updateStatus('test-4', TransactionStatus.cancelled);
+
+    await _pumpHome(tester, repository: repository);
+
+    expect(find.text('Cancelled on 2024-06-10'), findsOneWidget);
+    final cancelIcon = tester.widget<Icon>(find.byIcon(Icons.cancel));
+    expect(cancelIcon.color, Colors.grey);
+    expect(find.text('Pending since 2024-05-30'), findsOneWidget);
   });
 }

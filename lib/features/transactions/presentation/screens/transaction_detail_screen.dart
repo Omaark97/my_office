@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/transaction.dart';
 import '../../domain/transaction_document.dart';
-import '../../domain/transaction_status.dart';
 import '../formatters.dart';
 import '../load_error_message.dart';
+import '../transaction_status_style.dart';
 import '../transaction_providers.dart';
 
 class TransactionDetailScreen extends ConsumerWidget {
@@ -53,7 +53,6 @@ class TransactionDetailScreen extends ConsumerWidget {
     Transaction transaction,
     List<TransactionDocument> documents,
   ) {
-    final isCompleted = transaction.status == TransactionStatus.completed;
     final dateCompleted = transaction.dateCompleted;
 
     return SingleChildScrollView(
@@ -90,9 +89,7 @@ class TransactionDetailScreen extends ConsumerWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: isCompleted
-                            ? Colors.green.shade50
-                            : Colors.orange.shade50,
+                        color: transaction.status.badgeBackground,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -100,9 +97,7 @@ class TransactionDetailScreen extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: isCompleted
-                              ? Colors.green.shade700
-                              : Colors.orange.shade700,
+                          color: transaction.status.badgeText,
                         ),
                       ),
                     ),
