@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:my_office/app/app.dart';
 import 'package:my_office/features/auth/presentation/auth_providers.dart';
+import 'package:my_office/features/transactions/data/in_memory_transaction_repository.dart';
+import 'package:my_office/features/transactions/presentation/transaction_providers.dart';
 
 import 'features/auth/fake_auth_repository.dart';
 
@@ -17,6 +19,9 @@ void main() {
           authRepositoryProvider.overrideWithValue(
             FakeAuthRepository(signedInUser: testUser),
           ),
+          transactionRepositoryProvider.overrideWithValue(
+            InMemoryTransactionRepository(),
+          ),
         ],
         child: const MyApp(),
       ),
@@ -28,6 +33,6 @@ void main() {
 
     expect(find.text('Home'), findsOneWidget);
 
-    expect(find.text('Test User 1'), findsOneWidget);
+    expect(find.text('Test User 2'), findsOneWidget);
   });
 }

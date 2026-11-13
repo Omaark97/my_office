@@ -3,30 +3,30 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:my_office/features/transactions/data/in_memory_transaction_repository.dart';
 import 'package:my_office/features/transactions/data/transaction_repository.dart';
+import 'package:my_office/features/transactions/domain/archive_access_denied_exception.dart';
 import 'package:my_office/features/transactions/domain/transaction.dart';
 import 'package:my_office/features/transactions/domain/transaction_document.dart';
 import 'package:my_office/features/transactions/domain/transaction_status.dart';
+import 'package:my_office/features/transactions/presentation/load_error_message.dart';
 import 'package:my_office/features/transactions/presentation/screens/home_screen.dart';
 import 'package:my_office/features/transactions/presentation/transaction_providers.dart';
 
 import '../../../../test_helpers.dart';
 
 class _FailingRepository implements TransactionRepository {
+  _FailingRepository(this.error);
+
+  final Object error;
+
   @override
-  Future<List<Transaction>> getTransactions() async =>
-      throw Exception('offline');
+  Future<List<Transaction>> getTransactions() async => throw error;
 
   @override
   Future<List<TransactionDocument>> getDocuments(String transactionId) async =>
       const [];
 
   @override
-  Future<void> updateStatus(
-    String id, {
-    required TransactionStatus status,
-    DateTime? dateCompleted,
-    required DateTime updatedAt,
-  }) async {}
+  Future<void> updateStatus(String id, TransactionStatus status) async {}
 }
 
 Future<void> _pumpHome(
@@ -94,8 +94,36 @@ void main() {
   testWidgets('shows a message when transactions cannot be loaded', (
     tester,
   ) async {
-    await _pumpHome(tester, repository: _FailingRepository());
+    await _pumpHome(
+      tester,
+      repository: _FailingRepository(Exception('offline')),
+    );
 
     expect(find.text('Could not load transactions'), findsOneWidget);
+  });
+
+  testWidgets('tells a non-staff account it has no access', (tester) async {
+    await _pumpHome(
+      tester,
+      repository: _FailingRepository(const ArchiveAccessDeniedException()),
+    );
+
+    expect(find.text(archiveAccessDeniedMessage), findsOneWidget);
+    expect(find.text('Could not load transactions'), findsNothing);
+  });
+
+  testWidgets('shows "No transactions yet" for an empty archive', (
+    tester,
+  ) async {
+    await _pumpHome(
+      tester,
+      repository: InMemoryTransactionRepository(
+        transactions: [],
+        documents: {},
+      ),
+    );
+
+    expect(find.text('No transactions yet'), findsOneWidget);
+    expect(find.byType(ListTile), findsNothing);
   });
 }

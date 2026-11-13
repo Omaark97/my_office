@@ -1,13 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/in_memory_transaction_repository.dart';
+import '../data/firestore_transaction_repository.dart';
 import '../data/transaction_repository.dart';
 import '../domain/transaction.dart';
 import '../domain/transaction_document.dart';
 import '../domain/transaction_status.dart';
 
 final transactionRepositoryProvider = Provider<TransactionRepository>(
-  (ref) => InMemoryTransactionRepository(),
+  (ref) => FirestoreTransactionRepository(),
 );
 
 final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
@@ -36,17 +36,12 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
       );
     }
 
-    final now = ref.read(clockProvider)().toUtc();
     await ref
         .read(transactionRepositoryProvider)
-        .updateStatus(
-          id,
-          status: TransactionStatus.completed,
-          dateCompleted: now,
-          updatedAt: now,
-        );
+        .updateStatus(id, TransactionStatus.completed);
 
     if (!ref.mounted) return;
+    final now = ref.read(clockProvider)().toUtc();
     state = AsyncData([
       for (final t in transactions)
         if (t.id == id)

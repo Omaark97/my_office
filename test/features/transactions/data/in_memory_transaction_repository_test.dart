@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:my_office/features/transactions/data/in_memory_transaction_repository.dart';
+import 'package:my_office/features/transactions/data/transaction_repository.dart';
 import 'package:my_office/features/transactions/domain/transaction.dart';
 import 'package:my_office/features/transactions/domain/transaction_status.dart';
 import 'package:my_office/features/transactions/domain/transaction_type.dart';
@@ -10,15 +11,15 @@ void main() {
 
     setUp(() => repository = InMemoryTransactionRepository());
 
-    test('has the 5 test transactions in order', () async {
+    test('returns the test transactions newest received first', () async {
       final transactions = await repository.getTransactions();
 
       expect(transactions.map((t) => t.clientName), [
-        'Test User 1',
         'Test User 2',
-        'Test User 3',
-        'Test User 4',
         'Test User 5',
+        'Test User 4',
+        'Test User 1',
+        'Test User 3',
       ]);
     });
 
@@ -44,34 +45,70 @@ void main() {
     });
   });
 
-  test('updateStatus changes only the given transaction', () async {
-    final repository = InMemoryTransactionRepository();
+  group('updateStatus', () {
     final now = DateTime.utc(2024, 7, 1, 12);
+    late InMemoryTransactionRepository repository;
 
-    await repository.updateStatus(
-      'test-2',
-      status: TransactionStatus.completed,
-      dateCompleted: now,
-      updatedAt: now,
+    setUp(() => repository = InMemoryTransactionRepository(clock: () => now));
+
+    Future<Transaction> saved(String id) async =>
+        (await repository.getTransactions()).firstWhere((t) => t.id == id);
+
+    test('completing sets dateCompleted and updatedAt to now', () async {
+      await repository.updateStatus('test-2', TransactionStatus.completed);
+
+      final transaction = await saved('test-2');
+      expect(transaction.status, TransactionStatus.completed);
+      expect(transaction.dateCompleted, now);
+      expect(transaction.updatedAt, now);
+    });
+
+    test('cancelling sets updatedAt but no dateCompleted', () async {
+      await repository.updateStatus('test-4', TransactionStatus.cancelled);
+
+      final transaction = await saved('test-4');
+      expect(transaction.status, TransactionStatus.cancelled);
+      expect(transaction.dateCompleted, isNull);
+      expect(transaction.updatedAt, now);
+    });
+
+    test('changes only the given transaction', () async {
+      await repository.updateStatus('test-2', TransactionStatus.completed);
+
+      expect((await saved('test-4')).status, TransactionStatus.pending);
+    });
+
+    test('throws for an unknown id', () async {
+      expect(
+        () => repository.updateStatus('nope', TransactionStatus.completed),
+        throwsStateError,
+      );
+    });
+  });
+
+  test('returns at most one page of transactions', () async {
+    final many = [
+      for (var i = 0; i < transactionPageSize + 5; i++)
+        Transaction(
+          id: 'tx-$i',
+          type: TransactionType.other,
+          clientName: 'Test User $i',
+          status: TransactionStatus.pending,
+          dateReceived: DateTime.utc(2024, 1, 1, 12).add(Duration(days: i)),
+          createdBy: 'test-staff-uid',
+          createdAt: DateTime.utc(2024, 1, 1, 12),
+          updatedAt: DateTime.utc(2024, 1, 1, 12),
+        ),
+    ];
+    final repository = InMemoryTransactionRepository(
+      transactions: many,
+      documents: {},
     );
 
     final transactions = await repository.getTransactions();
-    expect(transactions[1].status, TransactionStatus.completed);
-    expect(transactions[1].dateCompleted, now);
-    expect(transactions[3].status, TransactionStatus.pending);
-  });
 
-  test('updateStatus throws for an unknown id', () async {
-    final repository = InMemoryTransactionRepository();
-
-    expect(
-      () => repository.updateStatus(
-        'nope',
-        status: TransactionStatus.completed,
-        updatedAt: DateTime.utc(2024),
-      ),
-      throwsStateError,
-    );
+    expect(transactions, hasLength(transactionPageSize));
+    expect(transactions.first.id, 'tx-${transactionPageSize + 4}');
   });
 
   test('can start with custom data', () async {

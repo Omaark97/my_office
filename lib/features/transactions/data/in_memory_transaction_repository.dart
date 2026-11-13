@@ -9,15 +9,19 @@ class InMemoryTransactionRepository implements TransactionRepository {
   InMemoryTransactionRepository({
     List<Transaction>? transactions,
     Map<String, List<TransactionDocument>>? documents,
+    DateTime Function()? clock,
   }) : _transactions = List.of(transactions ?? _testTransactions()),
-       _documents = Map.of(documents ?? _testDocuments());
+       _documents = Map.of(documents ?? _testDocuments()),
+       _clock = clock ?? DateTime.now;
 
   final List<Transaction> _transactions;
   final Map<String, List<TransactionDocument>> _documents;
+  final DateTime Function() _clock;
 
   @override
   Future<List<Transaction>> getTransactions() async {
-    return List.unmodifiable(_transactions);
+    final newestFirst = List.of(_transactions)..sort(_newestReceivedFirst);
+    return List.unmodifiable(newestFirst.take(transactionPageSize));
   }
 
   @override
@@ -26,22 +30,23 @@ class InMemoryTransactionRepository implements TransactionRepository {
   }
 
   @override
-  Future<void> updateStatus(
-    String id, {
-    required TransactionStatus status,
-    DateTime? dateCompleted,
-    required DateTime updatedAt,
-  }) async {
+  Future<void> updateStatus(String id, TransactionStatus status) async {
     final index = _transactions.indexWhere((t) => t.id == id);
     if (index == -1) {
       throw StateError('No transaction with id "$id"');
     }
+    final now = _clock().toUtc();
     _transactions[index] = _transactions[index].copyWith(
       status: status,
-      dateCompleted: dateCompleted,
-      updatedAt: updatedAt,
+      dateCompleted: status == TransactionStatus.completed ? now : null,
+      updatedAt: now,
     );
   }
+}
+
+int _newestReceivedFirst(Transaction a, Transaction b) {
+  final byDate = b.dateReceived.compareTo(a.dateReceived);
+  return byDate != 0 ? byDate : b.id.compareTo(a.id);
 }
 
 const _staffUid = 'test-staff-uid';

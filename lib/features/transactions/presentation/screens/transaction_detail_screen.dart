@@ -5,6 +5,7 @@ import '../../domain/transaction.dart';
 import '../../domain/transaction_document.dart';
 import '../../domain/transaction_status.dart';
 import '../formatters.dart';
+import '../load_error_message.dart';
 import '../transaction_providers.dart';
 
 class TransactionDetailScreen extends ConsumerWidget {
@@ -21,8 +22,18 @@ class TransactionDetailScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Transaction Details')),
       body: transactions.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) =>
-            const Center(child: Text('Could not load the transaction')),
+        error: (error, stackTrace) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(
+              loadErrorMessage(
+                error,
+                fallback: 'Could not load the transaction',
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
         data: (transactions) {
           final transaction = transactions
               .where((t) => t.id == transactionId)

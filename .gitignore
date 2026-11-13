@@ -71,3 +71,10 @@ scanned_documents/
 notes.md
 TODO.md
 scratch/
+
+# Firebase CLI and emulators
+.firebaserc
+node_modules/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
