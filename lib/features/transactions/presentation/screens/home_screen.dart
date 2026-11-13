@@ -391,14 +391,20 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 const SizedBox(width: 2),
 
-                Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
+                Tooltip(
+                  message: 'Add transaction',
+                  child: GestureDetector(
+                    onTap: () => context.push(AppRoutes.newTransaction),
+                    child: Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.add, color: Colors.teal),
+                    ),
                   ),
-                  child: Icon(Icons.add, color: Colors.teal),
                 ),
               ],
             ),

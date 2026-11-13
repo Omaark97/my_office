@@ -3,6 +3,8 @@ abstract final class AppRoutes {
   static const login = '/login';
   static const loading = '/loading';
 
+  static const newTransaction = '/transactions/new';
+
   static const transactionPattern = '/transactions/:id';
   static String transaction(String id) => '/transactions/$id';
 

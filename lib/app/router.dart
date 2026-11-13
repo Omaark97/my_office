@@ -9,6 +9,7 @@ import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/transactions/presentation/screens/document_gallery_screen.dart';
 import '../features/transactions/presentation/screens/home_screen.dart';
 import '../features/transactions/presentation/screens/transaction_detail_screen.dart';
+import '../features/transactions/presentation/screens/transaction_form_screen.dart';
 import 'routes.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -36,6 +37,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.home,
         builder: (context, state) => const HomeScreen(title: 'Home'),
+      ),
+      GoRoute(
+        path: AppRoutes.newTransaction,
+        builder: (context, state) => const TransactionFormScreen(),
       ),
       GoRoute(
         path: AppRoutes.transactionPattern,
