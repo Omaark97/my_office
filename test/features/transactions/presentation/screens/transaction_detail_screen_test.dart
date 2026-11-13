@@ -72,7 +72,7 @@ void main() {
     expect(find.text('Uploaded 2024-04-15 • 0.8 MB'), findsOneWidget);
   });
 
-  testWidgets('still shows the action buttons (wired in step 4)', (
+  testWidgets('shows the action buttons for a pending transaction', (
     tester,
   ) async {
     await _pumpDetail(tester, 'test-2');
@@ -135,5 +135,98 @@ void main() {
     final badgeText = tester.widget<Text>(find.text('Cancelled'));
     expect(badgeText.style!.color, Colors.grey.shade700);
     expect(find.textContaining('Completed:'), findsNothing);
+  });
+
+  group('action buttons', () {
+    Finder completeButton() =>
+        find.widgetWithText(ElevatedButton, 'Complete Transaction');
+    Finder cancelButton() =>
+        find.widgetWithText(OutlinedButton, 'Cancel Transaction');
+
+    testWidgets('are hidden for a completed transaction', (tester) async {
+      await _pumpDetail(tester, 'test-1');
+
+      expect(completeButton(), findsNothing);
+      expect(cancelButton(), findsNothing);
+    });
+
+    testWidgets('are hidden for a cancelled transaction', (tester) async {
+      final repository = InMemoryTransactionRepository();
+      await repository.updateStatus('test-4', TransactionStatus.cancelled);
+
+      await _pumpDetail(tester, 'test-4', repository: repository);
+
+      expect(completeButton(), findsNothing);
+      expect(cancelButton(), findsNothing);
+    });
+
+    testWidgets('Complete asks first, and "Keep it" changes nothing', (
+      tester,
+    ) async {
+      final repository = InMemoryTransactionRepository();
+      await _pumpDetail(tester, 'test-2', repository: repository);
+
+      await tester.ensureVisible(completeButton());
+      await tester.tap(completeButton());
+      await tester.pumpAndSettle();
+      expect(find.text('Complete this transaction?'), findsOneWidget);
+
+      await tester.tap(find.text('Keep it'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Complete this transaction?'), findsNothing);
+      expect(
+        (await repository.getTransaction('test-2'))!.status,
+        TransactionStatus.pending,
+      );
+      expect(completeButton(), findsOneWidget);
+    });
+
+    testWidgets('confirming Complete completes it and hides the buttons', (
+      tester,
+    ) async {
+      final repository = InMemoryTransactionRepository();
+      await _pumpDetail(tester, 'test-2', repository: repository);
+
+      await tester.ensureVisible(completeButton());
+      await tester.tap(completeButton());
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Complete'));
+      await tester.pumpAndSettle();
+
+      expect(
+        (await repository.getTransaction('test-2'))!.status,
+        TransactionStatus.completed,
+      );
+      expect(find.text('Transaction completed'), findsOneWidget);
+      expect(find.text('Completed'), findsOneWidget);
+      expect(completeButton(), findsNothing);
+      expect(cancelButton(), findsNothing);
+    });
+
+    testWidgets('confirming Cancel cancels it and hides the buttons', (
+      tester,
+    ) async {
+      final repository = InMemoryTransactionRepository();
+      await _pumpDetail(tester, 'test-4', repository: repository);
+
+      await tester.ensureVisible(cancelButton());
+      await tester.tap(cancelButton());
+      await tester.pumpAndSettle();
+      expect(find.text('Cancel this transaction?'), findsOneWidget);
+
+      await tester.tap(
+        find.widgetWithText(ElevatedButton, 'Cancel transaction'),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        (await repository.getTransaction('test-4'))!.status,
+        TransactionStatus.cancelled,
+      );
+      expect(find.text('Transaction cancelled'), findsOneWidget);
+      expect(find.text('Cancelled'), findsOneWidget);
+      expect(cancelButton(), findsNothing);
+    });
   });
 }
