@@ -5,28 +5,19 @@ import 'package:my_office/features/transactions/data/in_memory_transaction_repos
 import 'package:my_office/features/transactions/data/transaction_repository.dart';
 import 'package:my_office/features/transactions/domain/archive_access_denied_exception.dart';
 import 'package:my_office/features/transactions/domain/transaction.dart';
-import 'package:my_office/features/transactions/domain/transaction_document.dart';
-import 'package:my_office/features/transactions/domain/transaction_status.dart';
 import 'package:my_office/features/transactions/presentation/load_error_message.dart';
 import 'package:my_office/features/transactions/presentation/screens/home_screen.dart';
 import 'package:my_office/features/transactions/presentation/transaction_providers.dart';
 
 import '../../../../test_helpers.dart';
 
-class _FailingRepository implements TransactionRepository {
+class _FailingRepository extends InMemoryTransactionRepository {
   _FailingRepository(this.error);
 
   final Object error;
 
   @override
   Future<List<Transaction>> getTransactions() async => throw error;
-
-  @override
-  Future<List<TransactionDocument>> getDocuments(String transactionId) async =>
-      const [];
-
-  @override
-  Future<void> updateStatus(String id, TransactionStatus status) async {}
 }
 
 Future<void> _pumpHome(

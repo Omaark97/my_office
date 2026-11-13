@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart' hide Transaction;
 
 import '../domain/transaction.dart';
 import '../domain/transaction_document.dart';
+import '../domain/transaction_draft.dart';
 import '../domain/transaction_status.dart';
 import 'firestore_transaction_mapping.dart';
 import 'transaction_repository.dart';
@@ -46,6 +47,38 @@ class FirestoreTransactionRepository implements TransactionRepository {
           documentFromFirestore(doc.id, doc.data()),
       ];
     });
+  }
+
+  @override
+  Future<Transaction?> getTransaction(String id) {
+    return _guard(() async {
+      final snapshot = await _transactions
+          .doc(id)
+          .get(_withEstimatedServerTimes);
+      final data = snapshot.data();
+      return data == null ? null : transactionFromFirestore(snapshot.id, data);
+    });
+  }
+
+  @override
+  Future<String> createTransaction(
+    TransactionDraft draft, {
+    required String createdBy,
+  }) {
+    return _guard(() async {
+      final newDocument = _transactions.doc();
+      await newDocument.set(
+        newTransactionToFirestore(draft, createdBy: createdBy),
+      );
+      return newDocument.id;
+    });
+  }
+
+  @override
+  Future<void> updateDetails(String id, TransactionDraft draft) {
+    return _guard(
+      () => _transactions.doc(id).update(detailsChangeToFirestore(draft)),
+    );
   }
 
   @override

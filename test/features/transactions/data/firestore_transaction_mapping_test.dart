@@ -3,20 +3,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:my_office/features/transactions/data/firestore_transaction_mapping.dart';
 import 'package:my_office/features/transactions/domain/archive_access_denied_exception.dart';
 import 'package:my_office/features/transactions/domain/document_category.dart';
-import 'package:my_office/features/transactions/domain/transaction.dart';
+import 'package:my_office/features/transactions/domain/transaction_draft.dart';
 import 'package:my_office/features/transactions/domain/transaction_status.dart';
 import 'package:my_office/features/transactions/domain/transaction_type.dart';
 
-Transaction _pendingTransaction({String clientName = 'Test User 1'}) {
-  return Transaction(
-    id: 'tx-1',
+TransactionDraft _draft({String clientName = 'Test User 1'}) {
+  return TransactionDraft(
     type: TransactionType.lienRelease,
     clientName: clientName,
-    status: TransactionStatus.pending,
+    clientPhone: '03 123 456',
     dateReceived: DateTime.utc(2024, 5, 15, 12),
-    createdBy: 'test-staff-uid',
-    createdAt: DateTime.utc(2024, 5, 15, 12),
-    updatedAt: DateTime.utc(2024, 5, 15, 12),
   );
 }
 
@@ -65,7 +61,8 @@ void main() {
   group('newTransactionToFirestore', () {
     test('adds the normalized search key', () {
       final data = newTransactionToFirestore(
-        _pendingTransaction(clientName: '  أَحمـد   مصطفى  '),
+        _draft(clientName: '  أَحمـد   مصطفى  '),
+        createdBy: 'test-staff-uid',
       );
 
       expect(data['clientName'], '  أَحمـد   مصطفى  ');
@@ -73,7 +70,10 @@ void main() {
     });
 
     test('uses server time for createdAt and updatedAt', () {
-      final data = newTransactionToFirestore(_pendingTransaction());
+      final data = newTransactionToFirestore(
+        _draft(),
+        createdBy: 'test-staff-uid',
+      );
 
       expect(data['createdAt'], FieldValue.serverTimestamp());
       expect(data['updatedAt'], FieldValue.serverTimestamp());
@@ -81,7 +81,10 @@ void main() {
     });
 
     test('keeps dateReceived as entered and saves enums by key', () {
-      final data = newTransactionToFirestore(_pendingTransaction());
+      final data = newTransactionToFirestore(
+        _draft(),
+        createdBy: 'test-staff-uid',
+      );
 
       expect(
         data['dateReceived'],
@@ -90,8 +93,48 @@ void main() {
       expect(data['type'], 'lienRelease');
       expect(data['status'], 'pending');
       expect(data['customerId'], isNull);
-      expect(data.containsKey('id'), isFalse);
+      expect(data['createdBy'], 'test-staff-uid');
+      expect(data['clientPhone'], '03 123 456');
     });
+
+    test('writes exactly the fields the security rules expect', () {
+      final data = newTransactionToFirestore(
+        _draft(),
+        createdBy: 'test-staff-uid',
+      );
+
+      expect(data.keys.toSet(), {
+        'type',
+        'clientName',
+        'clientNameLower',
+        'clientPhone',
+        'customerId',
+        'status',
+        'dateReceived',
+        'dateCompleted',
+        'createdBy',
+        'createdAt',
+        'updatedAt',
+      });
+    });
+  });
+
+  group('detailsChangeToFirestore', () {
+    test(
+      'writes only the correctable fields, the search key and server time',
+      () {
+        final data = detailsChangeToFirestore(_draft(clientName: 'فاطمة'));
+
+        expect(data, {
+          'type': 'lienRelease',
+          'clientName': 'فاطمة',
+          'clientNameLower': 'فاطمه',
+          'clientPhone': '03 123 456',
+          'dateReceived': Timestamp.fromDate(DateTime.utc(2024, 5, 15, 12)),
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      },
+    );
   });
 
   group('statusChangeToFirestore', () {

@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:my_office/features/transactions/data/in_memory_transaction_repository.dart';
 import 'package:my_office/features/transactions/data/transaction_repository.dart';
 import 'package:my_office/features/transactions/domain/transaction.dart';
+import 'package:my_office/features/transactions/domain/transaction_draft.dart';
 import 'package:my_office/features/transactions/domain/transaction_status.dart';
 import 'package:my_office/features/transactions/domain/transaction_type.dart';
 
@@ -130,5 +131,70 @@ void main() {
 
     final transactions = await repository.getTransactions();
     expect(transactions.single.clientName, 'Test User 9');
+  });
+
+  group('create, read and correct', () {
+    final now = DateTime.utc(2024, 7, 1, 9);
+    late InMemoryTransactionRepository repository;
+
+    setUp(() => repository = InMemoryTransactionRepository(clock: () => now));
+
+    test('createTransaction adds a pending transaction', () async {
+      final id = await repository.createTransaction(
+        TransactionDraft(
+          type: TransactionType.lienRelease,
+          clientName: 'Test User 6',
+          clientPhone: '03 123 456',
+          dateReceived: DateTime.utc(2024, 6, 30, 12),
+        ),
+        createdBy: 'test-staff-uid',
+      );
+
+      final created = await repository.getTransaction(id);
+      expect(created!.status, TransactionStatus.pending);
+      expect(created.clientName, 'Test User 6');
+      expect(created.clientPhone, '03 123 456');
+      expect(created.createdBy, 'test-staff-uid');
+      expect(created.createdAt, now);
+      expect((await repository.getTransactions()).first.id, id);
+    });
+
+    test('getTransaction returns null for an unknown id', () async {
+      expect(await repository.getTransaction('nope'), isNull);
+    });
+
+    test('updateDetails changes only the details and updatedAt', () async {
+      await repository.updateDetails(
+        'test-2',
+        TransactionDraft(
+          type: TransactionType.other,
+          clientName: 'Test User Two',
+          dateReceived: DateTime.utc(2024, 5, 1, 12),
+        ),
+      );
+
+      final updated = await repository.getTransaction('test-2');
+      expect(updated!.clientName, 'Test User Two');
+      expect(updated.clientPhone, isNull);
+      expect(updated.type, TransactionType.other);
+      expect(updated.dateReceived, DateTime.utc(2024, 5, 1, 12));
+      expect(updated.updatedAt, now);
+      expect(updated.status, TransactionStatus.pending);
+      expect(updated.createdBy, 'test-staff-uid');
+    });
+
+    test('updateDetails throws for an unknown id', () async {
+      expect(
+        () => repository.updateDetails(
+          'nope',
+          TransactionDraft(
+            type: TransactionType.other,
+            clientName: 'Test User 9',
+            dateReceived: DateTime.utc(2024, 1, 1, 12),
+          ),
+        ),
+        throwsStateError,
+      );
+    });
   });
 }

@@ -1,10 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart' hide Transaction;
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:my_office/features/transactions/data/firestore_transaction_mapping.dart';
 import 'package:my_office/features/transactions/data/firestore_transaction_repository.dart';
 import 'package:my_office/features/transactions/data/transaction_repository.dart';
-import 'package:my_office/features/transactions/domain/transaction.dart';
+import 'package:my_office/features/transactions/domain/transaction_draft.dart';
 import 'package:my_office/features/transactions/domain/transaction_status.dart';
 import 'package:my_office/features/transactions/domain/transaction_type.dart';
 
@@ -177,28 +176,130 @@ void main() {
     });
   });
 
-  test('a new transaction can be written and read back', () async {
-    final transaction = Transaction(
-      id: 'ignored',
+  group('createTransaction', () {
+    final draft = TransactionDraft(
       type: TransactionType.privateCarOwnershipTransfer,
       clientName: 'فاطمة أحمد',
-      status: TransactionStatus.pending,
+      clientPhone: '03 123 456',
       dateReceived: DateTime.utc(2024, 7, 1, 12),
-      createdBy: 'test-staff-uid',
-      createdAt: DateTime.utc(2024, 7, 1, 12),
-      updatedAt: DateTime.utc(2024, 7, 1, 12),
-    );
-    final ref = await transactions().add(
-      newTransactionToFirestore(transaction),
     );
 
-    final saved = (await ref.get()).data()!;
-    final readBack = (await repository.getTransactions()).single;
+    test('saves a pending transaction and returns its id', () async {
+      final id = await repository.createTransaction(
+        draft,
+        createdBy: 'test-staff-uid',
+      );
 
-    expect(saved['clientNameLower'], 'فاطمه احمد');
-    expect(readBack.id, ref.id);
-    expect(readBack.clientName, 'فاطمة أحمد');
-    expect(readBack.type, TransactionType.privateCarOwnershipTransfer);
-    expect(readBack.dateReceived, DateTime.utc(2024, 7, 1, 12));
+      final saved = (await transactions().doc(id).get()).data()!;
+      expect(saved['status'], 'pending');
+      expect(saved['clientNameLower'], 'فاطمه احمد');
+      expect(saved['createdBy'], 'test-staff-uid');
+      expect(saved['createdAt'], isA<Timestamp>());
+      expect(saved['customerId'], isNull);
+    });
+
+    test('can be read back with getTransaction and getTransactions', () async {
+      final id = await repository.createTransaction(
+        draft,
+        createdBy: 'test-staff-uid',
+      );
+
+      final readBack = await repository.getTransaction(id);
+      expect(readBack!.id, id);
+      expect(readBack.clientName, 'فاطمة أحمد');
+      expect(readBack.clientPhone, '03 123 456');
+      expect(readBack.type, TransactionType.privateCarOwnershipTransfer);
+      expect(readBack.dateReceived, DateTime.utc(2024, 7, 1, 12));
+      expect((await repository.getTransactions()).single.id, id);
+    });
+  });
+
+  group('getTransaction', () {
+    test('returns null for an unknown id', () async {
+      expect(await repository.getTransaction('nope'), isNull);
+    });
+
+    test('finds a transaction older than the first page', () async {
+      for (var i = 0; i < transactionPageSize; i++) {
+        await transactions()
+            .doc('recent-$i')
+            .set(
+              _savedTransaction(
+                clientName: 'Test User $i',
+                dateReceived: DateTime.utc(
+                  2024,
+                  1,
+                  1,
+                  12,
+                ).add(Duration(days: i)),
+              ),
+            );
+      }
+      await transactions()
+          .doc('old-paper-file')
+          .set(
+            _savedTransaction(
+              clientName: 'Test User Old',
+              dateReceived: DateTime.utc(1985, 3, 1, 12),
+            ),
+          );
+
+      final page = await repository.getTransactions();
+      final old = await repository.getTransaction('old-paper-file');
+
+      expect(page.map((t) => t.id), isNot(contains('old-paper-file')));
+      expect(old!.clientName, 'Test User Old');
+    });
+  });
+
+  group('updateDetails', () {
+    setUp(() async {
+      await transactions()
+          .doc('tx-1')
+          .set(
+            _savedTransaction(
+              clientName: 'Test User 1',
+              dateReceived: DateTime.utc(2024, 5, 15, 12),
+            ),
+          );
+    });
+
+    test('changes the details and the search key', () async {
+      await repository.updateDetails(
+        'tx-1',
+        TransactionDraft(
+          type: TransactionType.lienRelease,
+          clientName: 'أحمد',
+          clientPhone: '71 123 456',
+          dateReceived: DateTime.utc(2023, 2, 1, 12),
+        ),
+      );
+
+      final saved = (await transactions().doc('tx-1').get()).data()!;
+      expect(saved['clientName'], 'أحمد');
+      expect(saved['clientNameLower'], 'احمد');
+      expect(saved['clientPhone'], '71 123 456');
+      expect(saved['type'], 'lienRelease');
+      expect(
+        saved['dateReceived'],
+        Timestamp.fromDate(DateTime.utc(2023, 2, 1, 12)),
+      );
+      expect(saved['status'], 'pending');
+      expect(saved['createdBy'], 'test-staff-uid');
+    });
+
+    test('throws a StateError for an unknown id', () async {
+      expect(
+        () => repository.updateDetails(
+          'nope',
+          TransactionDraft(
+            type: TransactionType.other,
+            clientName: 'Test User 9',
+            dateReceived: DateTime.utc(2024, 1, 1, 12),
+          ),
+        ),
+        throwsStateError,
+      );
+    });
   });
 }
