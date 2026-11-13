@@ -15,12 +15,12 @@ class TransactionDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final transactions = ref.watch(transactionListProvider);
+    final transactionAsync = ref.watch(transactionProvider(transactionId));
     final documents = ref.watch(transactionDocumentsProvider(transactionId));
 
     return Scaffold(
       appBar: AppBar(title: const Text('Transaction Details')),
-      body: transactions.when(
+      body: transactionAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) => Center(
           child: Padding(
@@ -34,10 +34,7 @@ class TransactionDetailScreen extends ConsumerWidget {
             ),
           ),
         ),
-        data: (transactions) {
-          final transaction = transactions
-              .where((t) => t.id == transactionId)
-              .firstOrNull;
+        data: (transaction) {
           if (transaction == null) {
             return const Center(child: Text('Transaction not found'));
           }
