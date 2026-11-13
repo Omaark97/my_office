@@ -7,8 +7,10 @@ import '../features/auth/presentation/auth_providers.dart';
 import '../features/auth/presentation/screens/loading_screen.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/transactions/presentation/screens/document_gallery_screen.dart';
+import '../features/transactions/presentation/screens/edit_transaction_screen.dart';
 import '../features/transactions/presentation/screens/home_screen.dart';
 import '../features/transactions/presentation/screens/transaction_detail_screen.dart';
+import '../features/transactions/presentation/screens/transaction_form_screen.dart';
 import 'routes.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -38,9 +40,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const HomeScreen(title: 'Home'),
       ),
       GoRoute(
+        path: AppRoutes.newTransaction,
+        builder: (context, state) => const TransactionFormScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.transactionPattern,
         builder: (context, state) =>
             TransactionDetailScreen(transactionId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: AppRoutes.editTransactionPattern,
+        builder: (context, state) =>
+            EditTransactionScreen(transactionId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: AppRoutes.galleryPattern,

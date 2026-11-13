@@ -4,6 +4,7 @@ import '../domain/archive_access_denied_exception.dart';
 import '../domain/client_name_search_key.dart';
 import '../domain/transaction.dart';
 import '../domain/transaction_document.dart';
+import '../domain/transaction_draft.dart';
 import '../domain/transaction_status.dart';
 
 Transaction transactionFromFirestore(String id, Map<String, dynamic> data) {
@@ -17,14 +18,32 @@ TransactionDocument documentFromFirestore(
   return TransactionDocument.fromMap(id, _withDateTimes(data));
 }
 
-Map<String, dynamic> newTransactionToFirestore(Transaction transaction) {
+Map<String, dynamic> newTransactionToFirestore(
+  TransactionDraft draft, {
+  required String createdBy,
+}) {
   return {
-    ...transaction.toMap(),
-    'clientNameLower': clientNameSearchKey(transaction.clientName),
-    'dateReceived': Timestamp.fromDate(transaction.dateReceived),
+    ..._detailsOf(draft),
+    'customerId': null,
+    'status': TransactionStatus.pending.key,
     'dateCompleted': null,
+    'createdBy': createdBy,
     'createdAt': FieldValue.serverTimestamp(),
     'updatedAt': FieldValue.serverTimestamp(),
+  };
+}
+
+Map<String, dynamic> detailsChangeToFirestore(TransactionDraft draft) {
+  return {..._detailsOf(draft), 'updatedAt': FieldValue.serverTimestamp()};
+}
+
+Map<String, dynamic> _detailsOf(TransactionDraft draft) {
+  return {
+    'type': draft.type.key,
+    'clientName': draft.clientName,
+    'clientNameLower': clientNameSearchKey(draft.clientName),
+    'clientPhone': draft.clientPhone,
+    'dateReceived': Timestamp.fromDate(draft.dateReceived),
   };
 }
 

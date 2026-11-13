@@ -4,11 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/routes.dart';
 import '../../../auth/presentation/auth_providers.dart';
-import '../formatters.dart';
+import '../transaction_status_style.dart';
 import '../load_error_message.dart';
 import '../transaction_icons.dart';
 import '../transaction_providers.dart';
-import '../../domain/transaction_status.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key, required this.title});
@@ -392,14 +391,20 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 const SizedBox(width: 2),
 
-                Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
+                Tooltip(
+                  message: 'Add transaction',
+                  child: GestureDetector(
+                    onTap: () => context.push(AppRoutes.newTransaction),
+                    child: Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.add, color: Colors.teal),
+                    ),
                   ),
-                  child: Icon(Icons.add, color: Colors.teal),
                 ),
               ],
             ),
@@ -442,8 +447,6 @@ class HomeScreen extends ConsumerWidget {
                           itemCount: transactions.length,
                           itemBuilder: (context, index) {
                             final t = transactions[index];
-                            final isCompleted =
-                                t.status == TransactionStatus.completed;
 
                             return ListTile(
                               onTap: () {
@@ -451,18 +454,10 @@ class HomeScreen extends ConsumerWidget {
                               },
                               leading: Icon(t.type.icon, color: Colors.teal),
                               title: Text(t.clientName),
-                              subtitle: Text(
-                                isCompleted && t.dateCompleted != null
-                                    ? 'Completed on ${formatDate(t.dateCompleted!)}'
-                                    : 'Pending since ${formatDate(t.dateReceived)}',
-                              ),
+                              subtitle: Text(statusLine(t)),
                               trailing: Icon(
-                                isCompleted
-                                    ? Icons.check_circle
-                                    : Icons.hourglass_empty,
-                                color: isCompleted
-                                    ? Colors.green
-                                    : Colors.orange,
+                                t.status.icon,
+                                color: t.status.iconColor,
                               ),
                             );
                           },

@@ -12,6 +12,10 @@ final authStateProvider = StreamProvider<AppUser?>(
   (ref) => ref.watch(authRepositoryProvider).authStateChanges(),
 );
 
+final currentUserIdProvider = Provider<String?>(
+  (ref) => ref.watch(authStateProvider).value?.uid,
+);
+
 final authControllerProvider = AsyncNotifierProvider<AuthController, void>(
   AuthController.new,
 );

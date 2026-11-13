@@ -24,6 +24,15 @@ const NOT_STAFF_UID = 'not-staff-uid';
 const TEN_MB = 10 * 1024 * 1024;
 
 const fixedTime = Timestamp.fromDate(new Date('2024-05-15T12:00:00Z'));
+const ONE_HOUR_MS = 60 * 60 * 1000;
+
+function hoursFromNow(hours) {
+  return Timestamp.fromMillis(Date.now() + hours * ONE_HOUR_MS);
+}
+
+function utcDate(isoDate) {
+  return Timestamp.fromDate(new Date(isoDate));
+}
 
 let testEnv;
 
@@ -255,6 +264,27 @@ describe('staff creating a transaction', () => {
   });
 });
 
+describe('date received on a new transaction', () => {
+  const create = (dateReceived) =>
+    setDoc(doc(staffDb(), 'transactions', 'new-tx'), newTransaction({ dateReceived }));
+
+  it('accepts today at noon, even before noon', async () => {
+    await assertSucceeds(create(hoursFromNow(6)));
+  });
+
+  it('accepts an old paper file from 1 January 1980', async () => {
+    await assertSucceeds(create(utcDate('1980-01-01T10:00:00Z')));
+  });
+
+  it('rejects a date before 1980', async () => {
+    await assertFails(create(utcDate('1979-06-01T12:00:00Z')));
+  });
+
+  it('rejects a date days in the future', async () => {
+    await assertFails(create(hoursFromNow(72)));
+  });
+});
+
 describe('staff correcting a pending transaction', () => {
   const correct = (fields) =>
     updateDoc(doc(staffDb(), 'transactions', 'pending-tx'), {
@@ -287,14 +317,26 @@ describe('staff correcting a pending transaction', () => {
     await assertFails(correct({ type: 'spaceship' }));
   });
 
-  it('cannot change who created it, when, or when it was received', async () => {
+  it('cannot change who created it or when', async () => {
     await assertFails(correct({ createdBy: OTHER_STAFF_UID }));
     await assertFails(correct({ createdAt: serverTimestamp() }));
-    await assertFails(correct({ dateReceived: Timestamp.now() }));
   });
 
   it('cannot link a customer', async () => {
     await assertFails(correct({ customerId: 'customer-uid' }));
+  });
+
+  it('can correct the date received', async () => {
+    await assertSucceeds(correct({ dateReceived: utcDate('2023-02-01T10:00:00Z') }));
+  });
+
+  it('cannot correct the date received to before 1980 or into the future', async () => {
+    await assertFails(correct({ dateReceived: utcDate('1975-01-01T12:00:00Z') }));
+    await assertFails(correct({ dateReceived: hoursFromNow(72) }));
+  });
+
+  it('cannot store the date received as a string', async () => {
+    await assertFails(correct({ dateReceived: '2023-02-01' }));
   });
 
   it('cannot mix a correction with a status change', async () => {
@@ -364,6 +406,10 @@ describe('completed and cancelled transactions are locked', () => {
     await assertFails(
       change('cancelled-tx', { status: 'completed', dateCompleted: serverTimestamp() }),
     );
+  });
+
+  it('cannot correct the date received of a completed transaction', async () => {
+    await assertFails(change('completed-tx', { dateReceived: utcDate('2023-02-01T10:00:00Z') }));
   });
 
   it('cannot correct a cancelled transaction', async () => {

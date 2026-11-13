@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../../app/routes.dart';
 
 import '../../domain/transaction.dart';
 import '../../domain/transaction_document.dart';
 import '../../domain/transaction_status.dart';
 import '../formatters.dart';
 import '../load_error_message.dart';
+import '../transaction_status_style.dart';
 import '../transaction_providers.dart';
+import '../widgets/confirm_dialog.dart';
 
 class TransactionDetailScreen extends ConsumerWidget {
   const TransactionDetailScreen({super.key, required this.transactionId});
@@ -15,12 +20,25 @@ class TransactionDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final transactions = ref.watch(transactionListProvider);
+    final transactionAsync = ref.watch(transactionProvider(transactionId));
     final documents = ref.watch(transactionDocumentsProvider(transactionId));
 
+    final canEdit = transactionAsync.value?.status == TransactionStatus.pending;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Transaction Details')),
-      body: transactions.when(
+      appBar: AppBar(
+        title: const Text('Transaction Details'),
+        actions: [
+          if (canEdit)
+            IconButton(
+              icon: const Icon(Icons.edit_outlined, color: Colors.teal),
+              tooltip: 'Edit',
+              onPressed: () =>
+                  context.push(AppRoutes.editTransaction(transactionId)),
+            ),
+        ],
+      ),
+      body: transactionAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) => Center(
           child: Padding(
@@ -34,15 +52,13 @@ class TransactionDetailScreen extends ConsumerWidget {
             ),
           ),
         ),
-        data: (transactions) {
-          final transaction = transactions
-              .where((t) => t.id == transactionId)
-              .firstOrNull;
+        data: (transaction) {
           if (transaction == null) {
             return const Center(child: Text('Transaction not found'));
           }
           return _buildDetails(
             context,
+            ref,
             transaction,
             documents.value ?? const [],
           );
@@ -53,10 +69,10 @@ class TransactionDetailScreen extends ConsumerWidget {
 
   Widget _buildDetails(
     BuildContext context,
+    WidgetRef ref,
     Transaction transaction,
     List<TransactionDocument> documents,
   ) {
-    final isCompleted = transaction.status == TransactionStatus.completed;
     final dateCompleted = transaction.dateCompleted;
 
     return SingleChildScrollView(
@@ -93,9 +109,7 @@ class TransactionDetailScreen extends ConsumerWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: isCompleted
-                            ? Colors.green.shade50
-                            : Colors.orange.shade50,
+                        color: transaction.status.badgeBackground,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -103,9 +117,7 @@ class TransactionDetailScreen extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: isCompleted
-                              ? Colors.green.shade700
-                              : Colors.orange.shade700,
+                          color: transaction.status.badgeText,
                         ),
                       ),
                     ),
@@ -363,68 +375,115 @@ class TransactionDetailScreen extends ConsumerWidget {
             ),
           ),
 
-          const SizedBox(height: 24),
+          if (transaction.status == TransactionStatus.pending) ...[
+            const SizedBox(height: 24),
 
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Complete Transaction tapped (Phase 2 will wire this up)',
-                    ),
-                    duration: Duration(seconds: 2),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => _confirmComplete(context, ref),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  elevation: 0,
                 ),
-                elevation: 0,
-              ),
-              child: const Text(
-                'Complete Transaction',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                child: const Text(
+                  'Complete Transaction',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                ),
               ),
             ),
-          ),
 
-          const SizedBox(height: 12),
+            const SizedBox(height: 12),
 
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Cancel Transaction tapped'),
-                    duration: Duration(seconds: 2),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () => _confirmCancel(context, ref),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.grey.shade800,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                );
-              },
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.grey.shade800,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: Colors.grey.shade300),
                 ),
-                side: BorderSide(color: Colors.grey.shade300),
-              ),
-              child: const Text(
-                'Cancel Transaction',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                child: const Text(
+                  'Cancel Transaction',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                ),
               ),
             ),
-          ),
+          ],
 
           const SizedBox(height: 24),
         ],
       ),
     );
+  }
+
+  Future<void> _confirmComplete(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Complete this transaction?',
+      message:
+          "It will be marked completed with today's date and can't be "
+          'changed afterwards.',
+      confirmLabel: 'Complete',
+      confirmColor: Colors.teal,
+    );
+    if (!confirmed || !context.mounted) return;
+    await _saveStatusChange(
+      context,
+      () => ref
+          .read(transactionListProvider.notifier)
+          .markCompleted(transactionId),
+      doneMessage: 'Transaction completed',
+    );
+  }
+
+  Future<void> _confirmCancel(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Cancel this transaction?',
+      message: "It will be archived as cancelled and can't be reopened.",
+      confirmLabel: 'Cancel transaction',
+      confirmColor: Colors.red.shade600,
+    );
+    if (!confirmed || !context.mounted) return;
+    await _saveStatusChange(
+      context,
+      () => ref
+          .read(transactionListProvider.notifier)
+          .markCancelled(transactionId),
+      doneMessage: 'Transaction cancelled',
+    );
+  }
+
+  Future<void> _saveStatusChange(
+    BuildContext context,
+    Future<void> Function() change, {
+    required String doneMessage,
+  }) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await change();
+      messenger.showSnackBar(SnackBar(content: Text(doneMessage)));
+    } catch (error) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            loadErrorMessage(
+              error,
+              fallback: 'Could not save the change. Please try again.',
+            ),
+          ),
+        ),
+      );
+    }
   }
 }

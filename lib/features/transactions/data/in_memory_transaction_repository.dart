@@ -1,6 +1,7 @@
 import '../domain/document_category.dart';
 import '../domain/transaction.dart';
 import '../domain/transaction_document.dart';
+import '../domain/transaction_draft.dart';
 import '../domain/transaction_status.dart';
 import '../domain/transaction_type.dart';
 import 'transaction_repository.dart';
@@ -25,22 +26,74 @@ class InMemoryTransactionRepository implements TransactionRepository {
   }
 
   @override
+  Future<Transaction?> getTransaction(String id) async {
+    return _transactions.where((t) => t.id == id).firstOrNull;
+  }
+
+  @override
   Future<List<TransactionDocument>> getDocuments(String transactionId) async {
     return List.unmodifiable(_documents[transactionId] ?? const []);
   }
 
   @override
+  Future<String> createTransaction(
+    TransactionDraft draft, {
+    required String createdBy,
+  }) async {
+    final now = _clock().toUtc();
+    final id = 'new-${_transactions.length + 1}';
+    _transactions.add(
+      Transaction(
+        id: id,
+        type: draft.type,
+        clientName: draft.clientName,
+        clientPhone: draft.clientPhone,
+        status: TransactionStatus.pending,
+        dateReceived: draft.dateReceived,
+        createdBy: createdBy,
+        createdAt: now,
+        updatedAt: now,
+      ),
+    );
+    return id;
+  }
+
+  @override
+  Future<void> updateDetails(String id, TransactionDraft draft) async {
+    final index = _indexOf(id);
+    final current = _transactions[index];
+    _transactions[index] = Transaction(
+      id: current.id,
+      type: draft.type,
+      clientName: draft.clientName,
+      clientPhone: draft.clientPhone,
+      customerId: current.customerId,
+      status: current.status,
+      dateReceived: draft.dateReceived,
+      dateCompleted: current.dateCompleted,
+      createdBy: current.createdBy,
+      createdAt: current.createdAt,
+      updatedAt: _clock().toUtc(),
+    );
+  }
+
+  @override
   Future<void> updateStatus(String id, TransactionStatus status) async {
-    final index = _transactions.indexWhere((t) => t.id == id);
-    if (index == -1) {
-      throw StateError('No transaction with id "$id"');
-    }
+    final index = _indexOf(id);
     final now = _clock().toUtc();
     _transactions[index] = _transactions[index].copyWith(
       status: status,
       dateCompleted: status == TransactionStatus.completed ? now : null,
       updatedAt: now,
     );
+  }
+
+  int _indexOf(String id) {
+    final index = _transactions.indexWhere((t) => t.id == id);
+    if (index == -1) {
+      throw StateError('No transaction with id "$id"');
+    }
+    return index;
   }
 }
 
