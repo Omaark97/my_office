@@ -89,19 +89,25 @@ service cloud.firestore {
       return data.keys().hasAll(fields) && data.keys().hasOnly(fields);
     }
 
-    function hasValidClientDetails(data) {
+    function isValidDateReceived(value) {
+      return value is timestamp
+        && value >= timestamp.date(1979, 12, 31)
+        && value <= request.time + duration.value(1, 'd');
+    }
+
+    function hasValidDetails(data) {
       return isNonEmptyString(data.clientName)
         && isNonEmptyString(data.clientNameLower)
         && isOptionalString(data.clientPhone)
-        && data.type in transactionTypes();
+        && data.type in transactionTypes()
+        && isValidDateReceived(data.dateReceived);
     }
 
     function isValidNewTransaction(data) {
       return hasExactly(data, transactionFields())
-        && hasValidClientDetails(data)
+        && hasValidDetails(data)
         && data.status == 'pending'
         && data.customerId == null
-        && data.dateReceived is timestamp
         && data.dateCompleted == null
         && data.createdBy == request.auth.uid
         && data.createdAt == request.time
@@ -112,15 +118,16 @@ service cloud.firestore {
       return request.resource.data.diff(resource.data).affectedKeys();
     }
 
-    function isClientDetailsCorrection() {
+    function isDetailsCorrection() {
       return changedFields().hasOnly([
           'clientName',
           'clientNameLower',
           'clientPhone',
           'type',
+          'dateReceived',
           'updatedAt'
         ])
-        && hasValidClientDetails(request.resource.data);
+        && hasValidDetails(request.resource.data);
     }
 
     function isCompletion() {
@@ -137,7 +144,7 @@ service cloud.firestore {
     function isAllowedChangeToPendingTransaction() {
       return resource.data.status == 'pending'
         && request.resource.data.updatedAt == request.time
-        && (isClientDetailsCorrection() || isCompletion() || isCancellation());
+        && (isDetailsCorrection() || isCompletion() || isCancellation());
     }
 
     function acceptsNewDocuments(transactionId) {
