@@ -318,16 +318,12 @@ class TransactionDetailScreen extends ConsumerWidget {
                               ),
                               IconButton(
                                 icon: Icon(
-                                  Icons.download,
+                                  Icons.ios_share,
                                   color: Colors.grey.shade600,
                                 ),
-                                tooltip: 'Open ${doc.name}',
-                                onPressed: () => openDocument(
-                                  context,
-                                  ref,
-                                  transaction.id,
-                                  doc,
-                                ),
+                                tooltip: 'Share / Print ${doc.name}',
+                                onPressed: () =>
+                                    shareDocument(context, ref, doc),
                               ),
                             ],
                           ),

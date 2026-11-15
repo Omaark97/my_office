@@ -63,6 +63,7 @@ class _Harness {
   final FakeDocumentStorage storage;
   final picker = FakeDocumentPicker();
   final opener = FakeDocumentOpener();
+  final sharer = FakeDocumentSharer();
   late Directory tempDir;
   late ProviderContainer container;
 
@@ -83,6 +84,7 @@ class _Harness {
         imageCompressorProvider.overrideWithValue(FakeImageCompressor()),
         documentPickerProvider.overrideWithValue(picker),
         documentOpenerProvider.overrideWithValue(opener),
+        documentSharerProvider.overrideWithValue(sharer),
         temporaryDocumentFilesProvider.overrideWithValue(
           TemporaryDocumentFiles(baseDirectory: () async => tempDir),
         ),
@@ -308,7 +310,7 @@ void main() {
     await harness.openTransaction(tester, 'test-5');
 
     await tester.runAsync(() async {
-      await tester.tap(find.byTooltip('Open Deed.pdf'));
+      await tester.tap(find.text('Deed.pdf'));
       for (var i = 0; i < 50 && harness.opener.openedPaths.isEmpty; i++) {
         await Future<void>.delayed(const Duration(milliseconds: 20));
         await tester.pump();
@@ -389,6 +391,87 @@ void main() {
       await _chooseSourceAndCategory(tester, 'Take photo', 'Other');
 
       expect(harness.picker.clearScannedPagesCalls, 0);
+    });
+  });
+
+  group('share / print', () {
+    Future<void> waitForShare(
+      WidgetTester tester,
+      _Harness harness,
+      Finder button,
+    ) async {
+      await tester.runAsync(() async {
+        await tester.tap(button);
+        for (var i = 0; i < 50 && harness.sharer.shared.isEmpty; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 20));
+          await tester.pump();
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+      });
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('each document row has a share icon instead of download', (
+      tester,
+    ) async {
+      final harness = _Harness();
+      await harness.addStoredDocument(
+        'test-5',
+        'Deed.pdf',
+        pdfMimeType,
+        fakePdfBytes,
+      );
+      await harness.openTransaction(tester, 'test-5');
+
+      expect(find.byIcon(Icons.ios_share), findsOneWidget);
+      expect(find.byIcon(Icons.download), findsNothing);
+      expect(find.byTooltip('Share / Print Deed.pdf'), findsOneWidget);
+    });
+
+    testWidgets('the row icon shares a PDF unchanged, then deletes the copy', (
+      tester,
+    ) async {
+      final harness = _Harness();
+      await harness.addStoredDocument(
+        'test-5',
+        'Deed.pdf',
+        pdfMimeType,
+        fakePdfBytes,
+      );
+      await harness.openTransaction(tester, 'test-5');
+
+      await waitForShare(
+        tester,
+        harness,
+        find.byTooltip('Share / Print Deed.pdf'),
+      );
+
+      final shared = harness.sharer.shared.single;
+      expect(shared.path, endsWith('/Deed.pdf'));
+      expect(shared.bytesAtShareTime, fakePdfBytes);
+      expect(File(shared.path).existsSync(), isFalse);
+      expect(harness.opener.openedPaths, isEmpty);
+    });
+
+    testWidgets('the image viewer shares the image as a PDF', (tester) async {
+      final harness = _Harness();
+      await harness.addStoredDocument(
+        'test-5',
+        'Scan.png',
+        'image/png',
+        Uint8List.fromList(_onePixelPng),
+      );
+      await harness.openTransaction(tester, 'test-5');
+      await tester.tap(find.text('Scan.png'));
+      await tester.pumpAndSettle();
+
+      await waitForShare(tester, harness, find.byTooltip('Share / Print'));
+
+      final shared = harness.sharer.shared.single;
+      expect(shared.mimeType, 'application/pdf');
+      expect(shared.path, endsWith('/Scan.pdf'));
+      expect(looksLikePdf(shared.bytesAtShareTime), isTrue);
+      expect(File(shared.path).existsSync(), isFalse);
     });
   });
 }

@@ -102,3 +102,30 @@ Future<void> openDocument(
     );
   }
 }
+
+Future<void> shareDocument(
+  BuildContext context,
+  WidgetRef ref,
+  TransactionDocument document,
+) async {
+  final messenger = ScaffoldMessenger.of(context);
+  messenger.showSnackBar(
+    SnackBar(content: Text('Preparing ${document.name}…')),
+  );
+  try {
+    await ref.read(documentShareControllerProvider).share(document);
+    messenger.hideCurrentSnackBar();
+  } catch (error) {
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          documentErrorMessage(
+            error,
+            fallback: 'Could not share the document. Please try again.',
+          ),
+        ),
+      ),
+    );
+  }
+}

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../transactions/presentation/transaction_providers.dart';
+import '../document_actions.dart';
 import '../document_error_message.dart';
 import '../document_providers.dart';
 
@@ -56,6 +57,14 @@ class DocumentViewerScreen extends ConsumerWidget {
           document?.name ?? 'Document',
           overflow: TextOverflow.ellipsis,
         ),
+        actions: [
+          if (document != null)
+            IconButton(
+              icon: const Icon(Icons.ios_share),
+              tooltip: 'Share / Print',
+              onPressed: () => shareDocument(context, ref, document),
+            ),
+        ],
       ),
       body: Center(child: body),
     );
