@@ -10,11 +10,14 @@ import '../../transactions/domain/transaction_document.dart';
 import '../../transactions/presentation/transaction_providers.dart';
 import '../data/document_opener.dart';
 import '../data/document_picker.dart';
+import '../data/document_sharer.dart';
 import '../data/firebase_document_storage.dart';
 import '../data/image_compressor.dart';
+import '../data/printable_pdf.dart';
 import '../data/temporary_document_files.dart';
 import '../domain/document_files.dart';
 import '../domain/document_storage.dart';
+import '../domain/hidden_share_action.dart';
 
 final documentStorageProvider = Provider<DocumentStorage>(
   (ref) => FirebaseDocumentStorage(),
@@ -34,6 +37,10 @@ final temporaryDocumentFilesProvider = Provider<TemporaryDocumentFiles>(
 
 final documentOpenerProvider = Provider<DocumentOpener>(
   (ref) => SystemDocumentOpener(),
+);
+
+final documentSharerProvider = Provider<DocumentSharer>(
+  (ref) => SystemDocumentSharer(),
 );
 
 final documentBytesProvider = FutureProvider.autoDispose
@@ -217,5 +224,41 @@ class DocumentOpenController {
           bytes: bytes,
         );
     await _ref.read(documentOpenerProvider).openPdf(copy.path);
+  }
+}
+
+final documentShareControllerProvider = Provider<DocumentShareController>(
+  DocumentShareController.new,
+);
+
+class DocumentShareController {
+  DocumentShareController(this._ref);
+
+  final Ref _ref;
+
+  Future<void> share(TransactionDocument document) async {
+    final bytes = await _ref
+        .read(documentStorageProvider)
+        .download(document.storagePath);
+    final printable = document.isPdf
+        ? bytes
+        : await imageAsPrintablePdf(bytes, title: document.name);
+    final copy = await _ref
+        .read(temporaryDocumentFilesProvider)
+        .writeForSharing(
+          fileName: shareFileName(document.name, asPdf: true),
+          bytes: printable,
+        );
+    try {
+      await _ref
+          .read(documentSharerProvider)
+          .shareFile(
+            copy.path,
+            mimeType: pdfMimeType,
+            hiddenActions: clientDocumentHiddenShareActions,
+          );
+    } finally {
+      if (await copy.exists()) await copy.delete();
+    }
   }
 }

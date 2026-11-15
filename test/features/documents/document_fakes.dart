@@ -1,10 +1,13 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:my_office/features/documents/data/document_opener.dart';
 import 'package:my_office/features/documents/data/document_picker.dart';
+import 'package:my_office/features/documents/data/document_sharer.dart';
 import 'package:my_office/features/documents/data/image_compressor.dart';
 import 'package:my_office/features/documents/domain/document_files.dart';
 import 'package:my_office/features/documents/domain/document_storage.dart';
+import 'package:my_office/features/documents/domain/hidden_share_action.dart';
 
 Uint8List fakeJpeg({int extraBytes = 100}) {
   return Uint8List.fromList([
@@ -127,5 +130,42 @@ class FakeDocumentOpener implements DocumentOpener {
   @override
   Future<void> openPdf(String filePath) async {
     openedPaths.add(filePath);
+  }
+}
+
+class SharedFile {
+  const SharedFile({
+    required this.path,
+    required this.mimeType,
+    required this.hiddenActions,
+    required this.bytesAtShareTime,
+  });
+
+  final String path;
+  final String mimeType;
+  final List<HiddenShareAction> hiddenActions;
+  final Uint8List bytesAtShareTime;
+}
+
+class FakeDocumentSharer implements DocumentSharer {
+  final shared = <SharedFile>[];
+  Object? failWith;
+
+  @override
+  Future<void> shareFile(
+    String filePath, {
+    required String mimeType,
+    required List<HiddenShareAction> hiddenActions,
+  }) async {
+    shared.add(
+      SharedFile(
+        path: filePath,
+        mimeType: mimeType,
+        hiddenActions: hiddenActions,
+        bytesAtShareTime: File(filePath).readAsBytesSync(),
+      ),
+    );
+    final failure = failWith;
+    if (failure != null) throw failure;
   }
 }
