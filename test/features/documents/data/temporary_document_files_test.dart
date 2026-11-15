@@ -79,4 +79,30 @@ void main() {
 
     expect(await other.exists(), isTrue);
   });
+
+  test('writes a sharing copy under the given file name', () async {
+    final file = await files.writeForSharing(
+      fileName: 'Vehicle Sale Deeds (1).pdf',
+      bytes: Uint8List.fromList('%PDF-1.7'.codeUnits),
+    );
+
+    expect(file.path, endsWith('/opened_documents/Vehicle Sale Deeds (1).pdf'));
+    expect(await file.readAsString(), '%PDF-1.7');
+  });
+
+  test('a sharing copy replaces an opened copy and vice versa', () async {
+    final opened = await files.writeForViewing(
+      documentId: 'doc-1',
+      extension: 'pdf',
+      bytes: Uint8List.fromList([1]),
+    );
+    final shared = await files.writeForSharing(
+      fileName: 'Deed.pdf',
+      bytes: Uint8List.fromList([2]),
+    );
+
+    expect(await opened.exists(), isFalse);
+    expect(await shared.exists(), isTrue);
+    expect(openedFolder().listSync(), hasLength(1));
+  });
 }

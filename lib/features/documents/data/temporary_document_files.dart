@@ -20,12 +20,15 @@ class TemporaryDocumentFiles {
     required String documentId,
     required String extension,
     required Uint8List bytes,
-  }) async {
-    await clearAll();
-    final folder = await _folder();
-    await folder.create(recursive: true);
-    final file = File('${folder.path}/$documentId.$extension');
-    return file.writeAsBytes(bytes, flush: true);
+  }) {
+    return _writeOnly('$documentId.$extension', bytes);
+  }
+
+  Future<File> writeForSharing({
+    required String fileName,
+    required Uint8List bytes,
+  }) {
+    return _writeOnly(fileName, bytes);
   }
 
   Future<void> clearAll() async {
@@ -33,5 +36,13 @@ class TemporaryDocumentFiles {
     if (await folder.exists()) {
       await folder.delete(recursive: true);
     }
+  }
+
+  Future<File> _writeOnly(String fileName, Uint8List bytes) async {
+    await clearAll();
+    final folder = await _folder();
+    await folder.create(recursive: true);
+    final file = File('${folder.path}/$fileName');
+    return file.writeAsBytes(bytes, flush: true);
   }
 }

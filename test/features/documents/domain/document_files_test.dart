@@ -200,4 +200,32 @@ void main() {
       'transactions/tx-1/documents/doc-1.jpg',
     );
   });
+
+  group('shareFileName', () {
+    test('an image shared as PDF gets a .pdf name', () {
+      expect(
+        shareFileName(
+          'Vehicle Sale Deeds 2026-11-15 10.30 (1).jpg',
+          asPdf: true,
+        ),
+        'Vehicle Sale Deeds 2026-11-15 10.30 (1).pdf',
+      );
+      expect(shareFileName('Scan.PNG', asPdf: true), 'Scan.pdf');
+    });
+
+    test('a PDF keeps its name', () {
+      expect(shareFileName('Notary_POA.pdf', asPdf: true), 'Notary_POA.pdf');
+    });
+
+    test('characters that are not allowed in file names are replaced', () {
+      expect(
+        shareFileName('Special/General Power: Deed?.pdf', asPdf: true),
+        'Special-General Power- Deed-.pdf',
+      );
+    });
+
+    test('an empty name becomes "Document"', () {
+      expect(shareFileName('   ', asPdf: true), 'Document.pdf');
+    });
+  });
 }

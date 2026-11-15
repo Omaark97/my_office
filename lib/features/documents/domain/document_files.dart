@@ -97,6 +97,20 @@ String pdfDocumentName(String pickedName) {
       : '$withoutFolders.pdf';
 }
 
+final _unsafeFileNameCharacters = RegExp(r'[/\\:*?"<>|]');
+final _imageExtension = RegExp(
+  r'\.(jpe?g|png|heic|heif)$',
+  caseSensitive: false,
+);
+
+String shareFileName(String documentName, {required bool asPdf}) {
+  var name = documentName.replaceAll(_unsafeFileNameCharacters, '-').trim();
+  if (name.isEmpty) name = 'Document';
+  if (!asPdf) return name;
+  name = name.replaceFirst(_imageExtension, '');
+  return name.toLowerCase().endsWith('.pdf') ? name : '$name.pdf';
+}
+
 class ImageSize {
   const ImageSize(this.width, this.height);
 
