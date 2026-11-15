@@ -99,9 +99,17 @@ class FakeImageCompressor implements ImageCompressor {
 }
 
 class FakeDocumentPicker implements DocumentPicker {
+  List<PickedDocumentFile> scanned = const [];
+  int clearScannedPagesCalls = 0;
   List<PickedDocumentFile> camera = const [];
   List<PickedDocumentFile> photos = const [];
   List<PickedDocumentFile> pdf = const [];
+
+  @override
+  Future<List<PickedDocumentFile>> scanDocument() async => scanned;
+
+  @override
+  Future<void> clearScannedPages() async => clearScannedPagesCalls++;
 
   @override
   Future<List<PickedDocumentFile>> takePhoto() async => camera;

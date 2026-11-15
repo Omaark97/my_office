@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import '../../../transactions/domain/document_category.dart';
 import '../../../transactions/presentation/transaction_icons.dart';
 
-enum DocumentSource { camera, photos, pdf }
+enum DocumentSource { scan, camera, photos, pdf }
 
 Future<DocumentSource?> showDocumentSourceSheet(BuildContext context) {
   return _showSheet<DocumentSource>(
     context,
     title: 'ADD DOCUMENTS',
     options: const [
+      (DocumentSource.scan, Icons.document_scanner_outlined, 'Scan document'),
       (DocumentSource.camera, Icons.photo_camera_outlined, 'Take photo'),
       (DocumentSource.photos, Icons.photo_library_outlined, 'Choose photos'),
       (DocumentSource.pdf, Icons.picture_as_pdf_outlined, 'Choose PDF'),

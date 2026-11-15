@@ -173,13 +173,14 @@ void main() {
       expect(_uploadZone, findsNothing);
     });
 
-    testWidgets('offers camera, photos and PDF', (tester) async {
+    testWidgets('offers scan, camera, photos and PDF', (tester) async {
       final harness = _Harness();
       await harness.openTransaction(tester, 'test-5');
 
       await _tapUploadZone(tester);
 
       expect(find.text('ADD DOCUMENTS'), findsOneWidget);
+      expect(find.text('Scan document'), findsOneWidget);
       expect(find.text('Take photo'), findsOneWidget);
       expect(find.text('Choose photos'), findsOneWidget);
       expect(find.text('Choose PDF'), findsOneWidget);
@@ -333,5 +334,61 @@ void main() {
 
     expect(find.text('Vehicle Sale Deeds'), findsOneWidget);
     expect(find.byType(Image), findsNothing);
+  });
+
+  group('scanning', () {
+    testWidgets(
+      'scanned pages are added numbered, then the scans are deleted',
+      (tester) async {
+        final harness = _Harness();
+        harness.picker.scanned = [
+          _photo('page_1.jpg'),
+          _photo('page_2.jpg'),
+          _photo('page_3.jpg'),
+        ];
+        await harness.openTransaction(tester, 'test-5');
+
+        await _chooseSourceAndCategory(
+          tester,
+          'Scan document',
+          'Vehicle Sale Deeds',
+        );
+
+        expect(find.text('3 documents added'), findsOneWidget);
+        expect(
+          find.text('Vehicle Sale Deeds 2026-11-15 10.30 (3).jpg'),
+          findsOneWidget,
+        );
+        expect(harness.storage.uploads, hasLength(3));
+        expect(harness.picker.clearScannedPagesCalls, 1);
+      },
+    );
+
+    testWidgets('scans are deleted even when no category is chosen', (
+      tester,
+    ) async {
+      final harness = _Harness();
+      harness.picker.scanned = [_photo('page_1.jpg')];
+      await harness.openTransaction(tester, 'test-5');
+
+      await _tapUploadZone(tester);
+      await tester.tap(find.text('Scan document'));
+      await tester.pumpAndSettle();
+      await tester.tapAt(const Offset(20, 20));
+      await tester.pumpAndSettle();
+
+      expect(harness.storage.uploads, isEmpty);
+      expect(harness.picker.clearScannedPagesCalls, 1);
+    });
+
+    testWidgets('other sources do not touch the scanner files', (tester) async {
+      final harness = _Harness();
+      harness.picker.camera = [_photo('camera.jpg')];
+      await harness.openTransaction(tester, 'test-5');
+
+      await _chooseSourceAndCategory(tester, 'Take photo', 'Other');
+
+      expect(harness.picker.clearScannedPagesCalls, 0);
+    });
   });
 }

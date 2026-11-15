@@ -1,14 +1,19 @@
+import 'package:cunning_document_scanner/cunning_document_scanner.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../domain/document_files.dart';
 
 abstract class DocumentPicker {
+  Future<List<PickedDocumentFile>> scanDocument();
+
   Future<List<PickedDocumentFile>> takePhoto();
 
   Future<List<PickedDocumentFile>> choosePhotos();
 
   Future<List<PickedDocumentFile>> choosePdf();
+
+  Future<void> clearScannedPages();
 }
 
 class PluginDocumentPicker implements DocumentPicker {
@@ -16,6 +21,23 @@ class PluginDocumentPicker implements DocumentPicker {
     : _imagePicker = imagePicker ?? ImagePicker();
 
   final ImagePicker _imagePicker;
+
+  @override
+  Future<List<PickedDocumentFile>> scanDocument() async {
+    final result = await CunningDocumentScanner.scanDocuments(
+      scannerSource: ScannerSource.camera,
+      output: ScanOutput.images,
+      iosScannerOptions: IosScannerOptions(
+        imageFormat: IosImageFormat.jpg,
+        jpgCompressionQuality: 1.0,
+      ),
+    );
+    if (result == null) return const [];
+    return [
+      for (final path in result.images)
+        PickedDocumentFile(path: path, name: path.split('/').last),
+    ];
+  }
 
   @override
   Future<List<PickedDocumentFile>> takePhoto() async {
@@ -44,6 +66,9 @@ class PluginDocumentPicker implements DocumentPicker {
     if (file == null || path == null) return const [];
     return [PickedDocumentFile(path: path, name: file.name)];
   }
+
+  @override
+  Future<void> clearScannedPages() => CunningDocumentScanner.cleanCache();
 
   PickedDocumentFile _fromXFile(XFile file) {
     return PickedDocumentFile(path: file.path, name: file.name);

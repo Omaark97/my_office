@@ -1198,6 +1198,8 @@ PODS:
     - Firebase/Firestore (= 12.19.3)
     - firebase_core
     - Flutter
+  - cunning_document_scanner (3.1.0):
+    - Flutter
   - file_picker_darwin (1.0.0):
     - Flutter
     - FlutterMacOS
@@ -1421,6 +1423,7 @@ PODS:
 
 DEPENDENCIES:
   - cloud_firestore (from `.symlinks/plugins/cloud_firestore/ios`)
+  - cunning_document_scanner (from `.symlinks/plugins/cunning_document_scanner/ios`)
   - file_picker_darwin (from `.symlinks/plugins/file_picker_darwin/darwin`)
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
@@ -1459,6 +1462,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   cloud_firestore:
     :path: ".symlinks/plugins/cloud_firestore/ios"
+  cunning_document_scanner:
+    :path: ".symlinks/plugins/cunning_document_scanner/ios"
   file_picker_darwin:
     :path: ".symlinks/plugins/file_picker_darwin/darwin"
   firebase_auth:
@@ -1480,6 +1485,7 @@ SPEC CHECKSUMS:
   abseil: a05cc83bf02079535e17169a73c5be5ba47f714b
   BoringSSL-GRPC: dded2a44897e45f28f08ae87a55ee4bcd19bc508
   cloud_firestore: a9637b45813d95cc7371aa819d31bf975b27ef31
+  cunning_document_scanner: 4c7ac3a63850083293ceb08beb74cf3a61e304b3
   file_picker_darwin: 4c2b9a50ea44cb3b071381ea0cf48591bdd80251
   Firebase: e3c5ab38229ae085490d02398d97b9f5374bbe6e
   firebase_auth: 1be750cad742730e67d5b6d959b563368eab05de
