@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart' hide Transaction;
 
+import '../domain/new_document.dart';
 import '../domain/transaction.dart';
 import '../domain/transaction_document.dart';
 import '../domain/transaction_draft.dart';
@@ -58,6 +59,29 @@ class FirestoreTransactionRepository implements TransactionRepository {
       final data = snapshot.data();
       return data == null ? null : transactionFromFirestore(snapshot.id, data);
     });
+  }
+
+  @override
+  String newDocumentId(String transactionId) {
+    return _documentsOf(transactionId).doc().id;
+  }
+
+  @override
+  Future<void> addDocument(
+    String transactionId,
+    String documentId,
+    NewDocument document, {
+    required String uploadedBy,
+  }) {
+    return _guard(
+      () => _documentsOf(transactionId)
+          .doc(documentId)
+          .set(newDocumentToFirestore(document, uploadedBy: uploadedBy)),
+    );
+  }
+
+  CollectionReference<Map<String, dynamic>> _documentsOf(String transactionId) {
+    return _transactions.doc(transactionId).collection('documents');
   }
 
   @override

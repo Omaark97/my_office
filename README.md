@@ -125,9 +125,9 @@ Until the app can add transactions, you can add one by hand in **Firestore → t
 | `createdAt` | timestamp | now |
 | `updatedAt` | timestamp | now |
 
-### Firestore rules tests
+### Security rules tests
 
-The rules in `firestore.rules` are tested against the local Firestore emulator. The tests use a `demo-` project, so they never touch the real database.
+The rules in `firestore.rules` and `storage.rules` are tested against the local Firestore and Storage emulators. The tests use a `demo-` project, so they never touch the real database or files.
 
 ```bash
 cd rules_test
@@ -143,6 +143,21 @@ Cloud Storage requires the pay-as-you-go **Blaze** plan. Before creating the Sto
 2. In Google Cloud **Billing → Budgets & alerts**, create a **$5/month** budget with email alerts.
 
 Budget alerts only send notifications. They do **not** stop charges.
+
+### Storage (one-time)
+
+1. **Storage → Get started:** create the default bucket in **`europe-west1`**, in **production mode**.
+2. **Deploy the Storage rules** from the project root:
+
+   ```bash
+   rules_test/node_modules/.bin/firebase deploy --only storage --project YOUR_PROJECT_ID
+   ```
+
+   The Storage rules check the staff list in Firestore. On the first deploy, the CLI asks to let Storage read Firestore: answer **yes**, or uploads and downloads are refused.
+
+Uploaded photos are converted to JPEG at archive quality (longest side 3,500 px, quality 90) so they print well. Every file is limited to 10 MB. Files can be added but never changed or deleted.
+
+**Share / Print** sends a document through the iOS share sheet for Print (AirPrint), AirDrop or Save to Files. Images are shared as a one-page A4 PDF with the original image inside, so they never offer Save to Photos or iCloud Shared Albums; Save to Photos, Copy and Assign to Contact are also hidden. The temporary copy made for sharing is deleted when the share sheet closes.
 
 ### Run
 

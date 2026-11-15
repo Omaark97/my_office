@@ -11,6 +11,11 @@ abstract final class AppRoutes {
   static const editTransactionPattern = '/transactions/:id/edit';
   static String editTransaction(String id) => '/transactions/$id/edit';
 
+  static const documentViewerPattern =
+      '/transactions/:id/documents/:documentId';
+  static String documentViewer(String transactionId, String documentId) =>
+      '/transactions/$transactionId/documents/$documentId';
+
   static const galleryPattern = '/gallery';
   static String gallery(String title) =>
       Uri(path: galleryPattern, queryParameters: {'title': title}).toString();

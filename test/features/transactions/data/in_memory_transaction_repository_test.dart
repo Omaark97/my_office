@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:my_office/features/transactions/data/in_memory_transaction_repository.dart';
 import 'package:my_office/features/transactions/data/transaction_repository.dart';
+import 'package:my_office/features/transactions/domain/document_category.dart';
+import 'package:my_office/features/transactions/domain/new_document.dart';
 import 'package:my_office/features/transactions/domain/transaction.dart';
 import 'package:my_office/features/transactions/domain/transaction_draft.dart';
 import 'package:my_office/features/transactions/domain/transaction_status.dart';
@@ -196,5 +198,28 @@ void main() {
         throwsStateError,
       );
     });
+  });
+
+  test('addDocument appends a document with the clock time', () async {
+    final now = DateTime.utc(2026, 11, 15, 8);
+    final repository = InMemoryTransactionRepository(clock: () => now);
+    final id = repository.newDocumentId('test-5');
+
+    await repository.addDocument(
+      'test-5',
+      id,
+      NewDocument(
+        name: 'Photo.jpg',
+        mimeType: 'image/jpeg',
+        sizeBytes: 300000,
+        category: DocumentCategory.identification,
+        storagePath: 'transactions/test-5/documents/$id.jpg',
+      ),
+      uploadedBy: 'test-staff-uid',
+    );
+
+    final documents = await repository.getDocuments('test-5');
+    expect(documents.single.id, id);
+    expect(documents.single.uploadedAt, now);
   });
 }

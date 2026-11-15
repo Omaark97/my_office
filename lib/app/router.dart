@@ -6,6 +6,7 @@ import '../features/auth/domain/app_user.dart';
 import '../features/auth/presentation/auth_providers.dart';
 import '../features/auth/presentation/screens/loading_screen.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
+import '../features/documents/presentation/screens/document_viewer_screen.dart';
 import '../features/transactions/presentation/screens/document_gallery_screen.dart';
 import '../features/transactions/presentation/screens/edit_transaction_screen.dart';
 import '../features/transactions/presentation/screens/home_screen.dart';
@@ -54,10 +55,16 @@ final routerProvider = Provider<GoRouter>((ref) {
             EditTransactionScreen(transactionId: state.pathParameters['id']!),
       ),
       GoRoute(
+        path: AppRoutes.documentViewerPattern,
+        builder: (context, state) => DocumentViewerScreen(
+          transactionId: state.pathParameters['id']!,
+          documentId: state.pathParameters['documentId']!,
+        ),
+      ),
+      GoRoute(
         path: AppRoutes.galleryPattern,
         builder: (context, state) => DocumentGalleryScreen(
           title: state.uri.queryParameters['title'] ?? '',
-          imageUrls: const [],
         ),
       ),
     ],

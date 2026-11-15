@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:my_office/features/transactions/data/firestore_transaction_mapping.dart';
 import 'package:my_office/features/transactions/domain/archive_access_denied_exception.dart';
 import 'package:my_office/features/transactions/domain/document_category.dart';
+import 'package:my_office/features/transactions/domain/new_document.dart';
 import 'package:my_office/features/transactions/domain/transaction_draft.dart';
 import 'package:my_office/features/transactions/domain/transaction_status.dart';
 import 'package:my_office/features/transactions/domain/transaction_type.dart';
@@ -178,6 +179,30 @@ void main() {
       );
 
       expect(repositoryErrorFrom(original), same(original));
+    });
+  });
+
+  group('newDocumentToFirestore', () {
+    final document = NewDocument(
+      name: 'Vehicle Sale Deeds 2026-11-15 10.30 (1).jpg',
+      mimeType: 'image/jpeg',
+      sizeBytes: 420000,
+      category: DocumentCategory.saleDeed,
+      storagePath: 'transactions/tx-1/documents/doc-1.jpg',
+    );
+
+    test('writes exactly the fields the security rules expect', () {
+      final data = newDocumentToFirestore(document, uploadedBy: 'staff-uid');
+
+      expect(data, {
+        'name': 'Vehicle Sale Deeds 2026-11-15 10.30 (1).jpg',
+        'mimeType': 'image/jpeg',
+        'sizeBytes': 420000,
+        'category': 'saleDeed',
+        'uploadedAt': FieldValue.serverTimestamp(),
+        'uploadedBy': 'staff-uid',
+        'storagePath': 'transactions/tx-1/documents/doc-1.jpg',
+      });
     });
   });
 }

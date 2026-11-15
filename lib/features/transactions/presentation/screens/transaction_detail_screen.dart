@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/routes.dart';
+import '../../../documents/presentation/document_actions.dart';
+import '../../../documents/presentation/document_providers.dart';
 
 import '../../domain/transaction.dart';
 import '../../domain/transaction_document.dart';
@@ -74,6 +76,7 @@ class TransactionDetailScreen extends ConsumerWidget {
     List<TransactionDocument> documents,
   ) {
     final dateCompleted = transaction.dateCompleted;
+    final uploadProgress = ref.watch(documentUploadProvider(transaction.id));
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -267,110 +270,117 @@ class TransactionDetailScreen extends ConsumerWidget {
                 else
                   Column(
                     children: documents.map((doc) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: Colors.teal.shade50,
-                                borderRadius: BorderRadius.circular(8),
+                      return InkWell(
+                        borderRadius: BorderRadius.circular(8),
+                        onTap: () =>
+                            openDocument(context, ref, transaction.id, doc),
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: Colors.teal.shade50,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  doc.isPdf
+                                      ? Icons.picture_as_pdf
+                                      : Icons.image,
+                                  color: Colors.teal,
+                                  size: 20,
+                                ),
                               ),
-                              child: Icon(
-                                doc.isPdf ? Icons.picture_as_pdf : Icons.image,
-                                color: Colors.teal,
-                                size: 20,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    doc.name,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      doc.name,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    'Uploaded ${formatDate(doc.uploadedAt)} • ${formatFileSize(doc.sizeBytes)}',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey.shade600,
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'Uploaded ${formatDate(doc.uploadedAt)} • ${formatFileSize(doc.sizeBytes)}',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade600,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                            IconButton(
-                              icon: Icon(
-                                Icons.download,
-                                color: Colors.grey.shade600,
+                              IconButton(
+                                icon: Icon(
+                                  Icons.ios_share,
+                                  color: Colors.grey.shade600,
+                                ),
+                                tooltip: 'Share / Print ${doc.name}',
+                                onPressed: () =>
+                                    shareDocument(context, ref, doc),
                               ),
-                              onPressed: () {},
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       );
                     }).toList(),
                   ),
 
-                const SizedBox(height: 8),
-                GestureDetector(
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Upload feature coming soon'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 24,
-                      horizontal: 16,
-                    ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: Colors.grey.shade300,
-                        width: 1.5,
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.file_upload_outlined,
-                          size: 28,
-                          color: Colors.grey.shade600,
+                if (transaction.status != TransactionStatus.cancelled) ...[
+                  const SizedBox(height: 8),
+                  if (uploadProgress != null)
+                    _UploadProgressBox(progress: uploadProgress)
+                  else
+                    GestureDetector(
+                      onTap: () => addDocumentsTo(context, ref, transaction.id),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 24,
+                          horizontal: 16,
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Add Supporting Documents',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey.shade700,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: Colors.grey.shade300,
+                            width: 1.5,
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'PDF, JPG, or PNG up to 10MB',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey.shade500,
-                          ),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.file_upload_outlined,
+                              size: 28,
+                              color: Colors.grey.shade600,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Add Supporting Documents',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'PDF, JPG, or PNG up to 10MB',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade500,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
+                ],
               ],
             ),
           ),
@@ -485,5 +495,45 @@ class TransactionDetailScreen extends ConsumerWidget {
         ),
       );
     }
+  }
+}
+
+class _UploadProgressBox extends StatelessWidget {
+  const _UploadProgressBox({required this.progress});
+
+  final UploadProgress progress;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.teal.shade100, width: 1.5),
+      ),
+      child: Column(
+        children: [
+          Text(
+            'Uploading ${progress.current} of ${progress.total}…',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade700,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progress.fraction,
+              minHeight: 6,
+              color: Colors.teal,
+              backgroundColor: Colors.teal.shade50,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

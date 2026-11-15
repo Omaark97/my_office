@@ -1,4 +1,5 @@
 import '../domain/document_category.dart';
+import '../domain/new_document.dart';
 import '../domain/transaction.dart';
 import '../domain/transaction_document.dart';
 import '../domain/transaction_draft.dart';
@@ -18,6 +19,7 @@ class InMemoryTransactionRepository implements TransactionRepository {
   final List<Transaction> _transactions;
   final Map<String, List<TransactionDocument>> _documents;
   final DateTime Function() _clock;
+  int _documentIds = 0;
 
   @override
   Future<List<Transaction>> getTransactions() async {
@@ -33,6 +35,35 @@ class InMemoryTransactionRepository implements TransactionRepository {
   @override
   Future<List<TransactionDocument>> getDocuments(String transactionId) async {
     return List.unmodifiable(_documents[transactionId] ?? const []);
+  }
+
+  @override
+  String newDocumentId(String transactionId) {
+    _documentIds++;
+    return 'new-doc-$_documentIds';
+  }
+
+  @override
+  Future<void> addDocument(
+    String transactionId,
+    String documentId,
+    NewDocument document, {
+    required String uploadedBy,
+  }) async {
+    final existing = _documents[transactionId] ?? const <TransactionDocument>[];
+    _documents[transactionId] = [
+      ...existing,
+      TransactionDocument(
+        id: documentId,
+        name: document.name,
+        mimeType: document.mimeType,
+        sizeBytes: document.sizeBytes,
+        category: document.category,
+        uploadedAt: _clock().toUtc(),
+        uploadedBy: uploadedBy,
+        storagePath: document.storagePath,
+      ),
+    ];
   }
 
   @override
