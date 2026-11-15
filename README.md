@@ -157,6 +157,8 @@ Budget alerts only send notifications. They do **not** stop charges.
 
 Uploaded photos are converted to JPEG at archive quality (longest side 3,500 px, quality 90) so they print well. Every file is limited to 10 MB. Files can be added but never changed or deleted.
 
+**Share / Print** sends a document through the iOS share sheet for Print (AirPrint), AirDrop or Save to Files. Images are shared as a one-page A4 PDF with the original image inside, so they never offer Save to Photos or iCloud Shared Albums; Save to Photos, Copy and Assign to Contact are also hidden. The temporary copy made for sharing is deleted when the share sheet closes.
+
 ### Run
 
 ```bash
