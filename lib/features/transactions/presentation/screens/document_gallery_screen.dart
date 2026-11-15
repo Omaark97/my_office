@@ -2,31 +2,23 @@ import 'package:flutter/material.dart';
 
 class DocumentGalleryScreen extends StatelessWidget {
   final String title;
-  final List<String> imageUrls;
 
-  const DocumentGalleryScreen({
-    super.key,
-    required this.title,
-    required this.imageUrls,
-  });
+  const DocumentGalleryScreen({super.key, required this.title});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(title)),
-      body: GridView.builder(
-        padding: const EdgeInsets.all(8),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          crossAxisSpacing: 6,
-          mainAxisSpacing: 6,
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            'Browsing documents by category is coming soon. '
+            'Open a transaction to see its documents.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey.shade600),
+          ),
         ),
-        itemCount: imageUrls.length,
-        itemBuilder: (context, index) {
-          return ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.network(imageUrls[index], fit: BoxFit.cover),
-          );
-        },
       ),
     );
   }
