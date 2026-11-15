@@ -3,6 +3,8 @@ import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:my_office/features/transactions/data/firestore_transaction_repository.dart';
 import 'package:my_office/features/transactions/data/transaction_repository.dart';
+import 'package:my_office/features/transactions/domain/document_category.dart';
+import 'package:my_office/features/transactions/domain/new_document.dart';
 import 'package:my_office/features/transactions/domain/transaction_draft.dart';
 import 'package:my_office/features/transactions/domain/transaction_status.dart';
 import 'package:my_office/features/transactions/domain/transaction_type.dart';
@@ -300,6 +302,39 @@ void main() {
         ),
         throwsStateError,
       );
+    });
+  });
+
+  group('documents', () {
+    test('newDocumentId gives a Firestore-style 20 character id', () {
+      final id = repository.newDocumentId('tx-1');
+
+      expect(id, matches(RegExp(r'^[A-Za-z0-9]{20}$')));
+      expect(repository.newDocumentId('tx-1'), isNot(id));
+    });
+
+    test('addDocument saves the details under that id', () async {
+      final id = repository.newDocumentId('tx-1');
+
+      await repository.addDocument(
+        'tx-1',
+        id,
+        NewDocument(
+          name: 'Deed.pdf',
+          mimeType: 'application/pdf',
+          sizeBytes: 1200,
+          category: DocumentCategory.saleDeed,
+          storagePath: 'transactions/tx-1/documents/$id.pdf',
+        ),
+        uploadedBy: 'test-staff-uid',
+      );
+
+      final saved = (await repository.getDocuments('tx-1')).single;
+      expect(saved.id, id);
+      expect(saved.name, 'Deed.pdf');
+      expect(saved.category, DocumentCategory.saleDeed);
+      expect(saved.uploadedBy, 'test-staff-uid');
+      expect(saved.storagePath, 'transactions/tx-1/documents/$id.pdf');
     });
   });
 }

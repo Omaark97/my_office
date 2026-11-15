@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart' hide Transaction;
 
 import '../domain/archive_access_denied_exception.dart';
 import '../domain/client_name_search_key.dart';
+import '../domain/new_document.dart';
 import '../domain/transaction.dart';
 import '../domain/transaction_document.dart';
 import '../domain/transaction_draft.dart';
@@ -30,6 +31,21 @@ Map<String, dynamic> newTransactionToFirestore(
     'createdBy': createdBy,
     'createdAt': FieldValue.serverTimestamp(),
     'updatedAt': FieldValue.serverTimestamp(),
+  };
+}
+
+Map<String, dynamic> newDocumentToFirestore(
+  NewDocument document, {
+  required String uploadedBy,
+}) {
+  return {
+    'name': document.name,
+    'mimeType': document.mimeType,
+    'sizeBytes': document.sizeBytes,
+    'category': document.category.key,
+    'uploadedAt': FieldValue.serverTimestamp(),
+    'uploadedBy': uploadedBy,
+    'storagePath': document.storagePath,
   };
 }
 
