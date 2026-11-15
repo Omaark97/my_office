@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>My Office uses the camera to photograph and scan client documents for the archive.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>My Office lets you choose photos of client documents to add to the archive.</string>
 </dict>
 </plist>
