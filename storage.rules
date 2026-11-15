@@ -1,0 +1,47 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isStaff() {
+      return isSignedIn()
+        && firestore.exists(/databases/(default)/documents/staff/$(request.auth.uid));
+    }
+
+    function maxDocumentBytes() {
+      return 10 * 1024 * 1024;
+    }
+
+    function hasAllowedSize() {
+      return request.resource.size > 0
+        && request.resource.size <= maxDocumentBytes();
+    }
+
+    function hasMatchingNameAndType(fileName) {
+      return (fileName.matches('[A-Za-z0-9]{20}[.]jpg')
+          && request.resource.contentType == 'image/jpeg')
+        || (fileName.matches('[A-Za-z0-9]{20}[.]png')
+          && request.resource.contentType == 'image/png')
+        || (fileName.matches('[A-Za-z0-9]{20}[.]pdf')
+          && request.resource.contentType == 'application/pdf');
+    }
+
+    function acceptsNewDocuments(transactionId) {
+      return firestore.get(/databases/(default)/documents/transactions/$(transactionId)).data.status in ['pending', 'completed'];
+    }
+
+    match /transactions/{transactionId}/documents/{fileName} {
+      allow read: if isStaff();
+      allow create: if isStaff()
+        && resource == null
+        && hasAllowedSize()
+        && hasMatchingNameAndType(fileName)
+        && acceptsNewDocuments(transactionId);
+      allow update, delete: if false;
+    }
+  }
+}
